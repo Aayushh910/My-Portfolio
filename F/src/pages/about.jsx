@@ -31,7 +31,7 @@ export default function AboutPage() {
     ]
 
     return (
-        <main className="about-page" aria-label="About me">
+        <div className="about-page" aria-label="About me">
             <div className="about-grid section-container">
 
                 {/* ── Left: Avatar ── */}
@@ -86,6 +86,6 @@ export default function AboutPage() {
                     </div>
                 </div>
             </div>
-        </main>
+        </div>
     )
 }

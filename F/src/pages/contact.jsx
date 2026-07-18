@@ -6,27 +6,27 @@ const contactDetails = [
     {
         icon: <MdEmail />,
         label: 'Email',
-        value: 'aayush@example.com',
-        href: 'mailto:aayush@example.com',
+        value: 'aayushsavaliya910@gmail.com',
+        href: 'mailto:aayushsavaliya910@gmail.com',
     },
     {
         icon: <FaPhone />,
         label: 'Phone',
-        value: '+91 99999 99999',
-        href: 'tel:+919999999999',
+        value: '+91 82002 56660',
+        href: 'tel:+918200256660',
     },
     {
         icon: <MdLocationOn />,
         label: 'Location',
-        value: 'India',
+        value: 'Ahmedabad, Gujarat, India',
         href: null,
     },
 ]
 
 const socials = [
-    { icon: <FaGithub />, label: 'GitHub', href: 'https://github.com/' },
-    { icon: <FaLinkedin />, label: 'LinkedIn', href: 'https://linkedin.com/in/' },
-    { icon: <FaXTwitter />, label: 'Twitter', href: 'https://twitter.com/' },
+    { icon: <FaGithub />,   label: 'GitHub',   href: 'https://github.com/Aayushh910' },
+    { icon: <FaLinkedin />, label: 'LinkedIn',  href: 'https://www.linkedin.com/in/aayush-savaliya-50776b32a' },
+    { icon: <FaXTwitter />, label: 'LeetCode',  href: 'https://leetcode.com/Aayushh01/' },
 ]
 
 export default function ContactPage() {
@@ -43,7 +43,7 @@ export default function ContactPage() {
     }
 
     return (
-        <main className="contact-page" aria-label="Contact">
+        <div className="contact-page" aria-label="Contact">
 
             {/* Section header */}
             <div className="skills-page-header">
@@ -172,6 +172,6 @@ export default function ContactPage() {
                     )}
                 </div>
             </div>
-        </main>
+        </div>
     )
 }

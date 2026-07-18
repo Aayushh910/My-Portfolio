@@ -8,81 +8,54 @@ import {
 } from 'react-icons/fa'
 import { MdApi } from 'react-icons/md'
 
-// ── Skill data – icon is a React element ──────────────────────
-const defaultSkills = [
+const skillGroups = [
     {
         category: 'AI & Machine Learning',
+        icon: <FaBrain />,
         skills: [
-            { name: 'Python', icon: <SiPython />, level: 92 },
-            { name: 'Machine Learning', icon: <FaBrain />, level: 88 },
-            { name: 'Deep Learning', icon: <FaBrain />, level: 80 },
-            { name: 'scikit-learn', icon: <FaCog />, level: 85 },
-            { name: 'Pandas / NumPy', icon: <SiPandas />, level: 90 },
-            { name: 'Data Analytics', icon: <FaChartLine />, level: 88 },
+            { name: 'Python',          icon: <SiPython /> },
+            { name: 'Machine Learning',icon: <FaBrain /> },
+            { name: 'Deep Learning',   icon: <FaBrain /> },
+            { name: 'scikit-learn',    icon: <FaCog /> },
+            { name: 'Pandas / NumPy',  icon: <SiPandas /> },
+            { name: 'Data Analytics',  icon: <FaChartLine /> },
         ],
     },
     {
         category: 'Backend & APIs',
+        icon: <SiFastapi />,
         skills: [
-            { name: 'FastAPI', icon: <SiFastapi />, level: 85 },
-            { name: 'SQL', icon: <FaDatabase />, level: 88 },
-            { name: 'REST APIs', icon: <MdApi />, level: 86 },
-            { name: 'PostgreSQL', icon: <SiPostgresql />, level: 78 },
+            { name: 'FastAPI',    icon: <SiFastapi /> },
+            { name: 'SQL',        icon: <FaDatabase /> },
+            { name: 'REST APIs',  icon: <MdApi /> },
+            { name: 'PostgreSQL', icon: <SiPostgresql /> },
         ],
     },
     {
         category: 'Frontend & Visualisation',
+        icon: <SiReact />,
         skills: [
-            { name: 'React', icon: <SiReact />, level: 82 },
-            { name: 'Power BI', icon: <FaChartBar />, level: 85 },
-            { name: 'HTML / CSS', icon: <SiHtml5 />, level: 80 },
+            { name: 'React',      icon: <SiReact /> },
+            { name: 'Power BI',   icon: <FaChartBar /> },
+            { name: 'HTML / CSS', icon: <SiHtml5 /> },
         ],
     },
     {
         category: 'Cloud, Tools & DevOps',
+        icon: <FaCloud />,
         skills: [
-            { name: 'AWS / GCP', icon: <FaCloud />, level: 72 },
-            { name: 'Git', icon: <SiGit />, level: 90 },
-            { name: 'GitHub', icon: <SiGithub />, level: 90 },
-            { name: 'VS Code', icon: <FaCode />, level: 95 },
-            { name: 'Jupyter', icon: <SiJupyter />, level: 90 },
+            { name: 'AWS / GCP', icon: <FaCloud /> },
+            { name: 'Git',       icon: <SiGit /> },
+            { name: 'GitHub',    icon: <SiGithub /> },
+            { name: 'VS Code',   icon: <FaCode /> },
+            { name: 'Jupyter',   icon: <SiJupyter /> },
         ],
     },
 ]
 
-function SkillCard({ name, icon, level }) {
-    const levelLabel =
-        level >= 88 ? 'Expert' :
-            level >= 75 ? 'Advanced' :
-                level >= 55 ? 'Intermediate' : 'Beginner'
-
+export default function SkillPage() {
     return (
-        <div className="skill-card" title={`${name} – ${level}%`}>
-            <div className="skill-icon" aria-hidden="true">{icon}</div>
-            <div className="skill-name">{name}</div>
-            <div className="skill-bar-wrap">
-                <div
-                    className="skill-bar-fill"
-                    style={{ width: `${level}%` }}
-                    role="progressbar"
-                    aria-valuenow={level}
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                    aria-label={`${name} proficiency`}
-                />
-            </div>
-            <div className="skill-level">{levelLabel} · {level}%</div>
-        </div>
-    )
-}
-
-/**
- * SkillPage
- * @param {{ skillGroups?: Array }} props
- */
-export default function SkillPage({ skillGroups = defaultSkills }) {
-    return (
-        <main className="skills-page" aria-label="Skills">
+        <div className="skills-page" aria-label="Skills">
 
             <div className="skills-page-header">
                 <p className="page-section-label">What I Know</p>
@@ -95,19 +68,25 @@ export default function SkillPage({ skillGroups = defaultSkills }) {
                 </p>
             </div>
 
-            <div className="skills-categories section-container">
+            <div className="skill-group-grid section-container">
                 {skillGroups.map(group => (
-                    <div key={group.category}>
-                        <h2 className="skill-category-title">{group.category}</h2>
-                        <div className="skills-grid">
-                            {group.skills.map(skill => (
-                                <SkillCard key={skill.name} {...skill} />
+                    <div key={group.category} className="skill-group-card">
+                        <div className="skill-group-header">
+                            <span className="skill-group-cat-icon" aria-hidden="true">{group.icon}</span>
+                            <h2 className="skill-group-title">{group.category}</h2>
+                        </div>
+                        <div className="skill-pill-list">
+                            {group.skills.map(s => (
+                                <span key={s.name} className="skill-pill">
+                                    <span className="skill-pill-icon" aria-hidden="true">{s.icon}</span>
+                                    {s.name}
+                                </span>
                             ))}
                         </div>
                     </div>
                 ))}
             </div>
 
-        </main>
+        </div>
     )
 }

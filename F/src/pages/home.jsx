@@ -1,6 +1,11 @@
-import { Link } from 'react-router-dom'
 import { useTheme } from '../context/ThemeContext'
 import SideRays from '../components/SideRays'
+
+function scrollTo(id) {
+    const el = document.getElementById(id)
+    if (!el) return
+    window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 68, behavior: 'smooth' })
+}
 
 /* Ray colors tuned per theme — decent, no neon */
 const RAY_CONFIG = {
@@ -69,12 +74,12 @@ export default function HomePage() {
                 </p>
 
                 <div className="hero-actions">
-                    <Link to="/contact" className="btn-primary">
+                    <button className="btn-primary" onClick={() => scrollTo('contact')}>
                         Let's Talk →
-                    </Link>
-                    <Link to="/about" className="btn-secondary">
+                    </button>
+                    <button className="btn-secondary" onClick={() => scrollTo('about')}>
                         Learn More
-                    </Link>
+                    </button>
                 </div>
             </div>
 
