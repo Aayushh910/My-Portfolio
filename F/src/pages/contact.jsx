@@ -1,54 +1,177 @@
-function ContactPage() {
-  function handleSubmit(e) {
-    e.preventDefault()
-    alert('Message sent. I will get back to you shortly.')
-    e.target.reset()
-  }
+import { useState } from 'react'
+import { MdEmail, MdLocationOn, MdSend, MdCheckCircle } from 'react-icons/md'
+import { FaPhone, FaGithub, FaLinkedin, FaXTwitter } from 'react-icons/fa6'
 
-  return (
-    <>
-      <div className="page-hero">
-        <p className="page-hero-eyebrow">Contact</p>
-        <h1>Get in Touch</h1>
-        <p>Have a project in mind or just want to say hello? I would love to hear from you.</p>
-      </div>
+const contactDetails = [
+    {
+        icon: <MdEmail />,
+        label: 'Email',
+        value: 'aayush@example.com',
+        href: 'mailto:aayush@example.com',
+    },
+    {
+        icon: <FaPhone />,
+        label: 'Phone',
+        value: '+91 99999 99999',
+        href: 'tel:+919999999999',
+    },
+    {
+        icon: <MdLocationOn />,
+        label: 'Location',
+        value: 'India',
+        href: null,
+    },
+]
 
-      <div className="page-body">
-        <div className="contact-grid">
-          <div className="contact-info-list">
-            <div className="contact-info-item">
-              <span className="ci-label">Email</span>
-              <span className="ci-val">aayush@example.com</span>
-            </div>
-            <div className="contact-info-item">
-              <span className="ci-label">Phone</span>
-              <span className="ci-val">+91 98765 43210</span>
-            </div>
-            <div className="contact-info-item">
-              <span className="ci-label">Location</span>
-              <span className="ci-val">India</span>
-            </div>
-            <div className="contact-info-item">
-              <span className="ci-label">Availability</span>
-              <span className="ci-val" style={{ color: '#16a34a' }}>Open to opportunities</span>
-            </div>
-          </div>
+const socials = [
+    { icon: <FaGithub />, label: 'GitHub', href: 'https://github.com/' },
+    { icon: <FaLinkedin />, label: 'LinkedIn', href: 'https://linkedin.com/in/' },
+    { icon: <FaXTwitter />, label: 'Twitter', href: 'https://twitter.com/' },
+]
 
-          <form className="contact-form" onSubmit={handleSubmit}>
-            <div className="form-row">
-              <input type="text" placeholder="Name" required />
-              <input type="email" placeholder="Email" required />
+export default function ContactPage() {
+    const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' })
+    const [submitted, setSubmitted] = useState(false)
+
+    const handleChange = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }))
+
+    const handleSubmit = e => {
+        e.preventDefault()
+        console.log('Contact form submitted:', form)
+        setSubmitted(true)
+        setForm({ name: '', email: '', subject: '', message: '' })
+    }
+
+    return (
+        <main className="contact-page" aria-label="Contact">
+
+            {/* Section header */}
+            <div className="skills-page-header">
+                <p className="page-section-label">Get In Touch</p>
+                <h1 className="page-section-title">
+                    Let's <span className="gradient-text">Work Together</span>
+                </h1>
+                <p className="page-section-sub">
+                    Have a project, collaboration, or just want to say hi?
+                    My inbox is always open.
+                </p>
             </div>
-            <input type="text" placeholder="Subject" />
-            <textarea rows="5" placeholder="Your message..." required />
-            <button className="btn-primary" type="submit" style={{ alignSelf: 'flex-start' }}>
-              Send Message
-            </button>
-          </form>
-        </div>
-      </div>
-    </>
-  )
+
+            <div className="contact-inner section-container">
+
+                {/* ── Contact info ── */}
+                <div className="contact-info">
+                    <h2 className="contact-info-title animate-fade-up">
+                        Contact <span className="gradient-text">Information</span>
+                    </h2>
+                    <p className="contact-info-text animate-fade-up-d1">
+                        I'm currently available for freelance AI/ML projects, full-time
+                        roles, or exciting data collaborations. Reach out through any
+                        channel below.
+                    </p>
+
+                    <div className="contact-detail-list animate-fade-up-d2">
+                        {contactDetails.map(d => (
+                            <div className="contact-detail-item" key={d.label}>
+                                <div className="contact-detail-icon" aria-hidden="true">
+                                    {d.icon}
+                                </div>
+                                <div>
+                                    <div className="contact-detail-label">{d.label}</div>
+                                    {d.href
+                                        ? <a className="contact-detail-value" href={d.href}>{d.value}</a>
+                                        : <span className="contact-detail-value">{d.value}</span>
+                                    }
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Social links */}
+                    <div className="contact-social-row animate-fade-up-d3">
+                        {socials.map(s => (
+                            <a
+                                key={s.label}
+                                href={s.href}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="social-icon-btn"
+                                aria-label={s.label}
+                                title={s.label}
+                            >
+                                {s.icon}
+                            </a>
+                        ))}
+                    </div>
+                </div>
+
+                {/* ── Contact form ── */}
+                <div className="contact-form-card animate-fade-up-d1">
+                    {submitted ? (
+                        <div className="form-success">
+                            <MdCheckCircle
+                                style={{ fontSize: '3rem', color: 'var(--clr-accent-soft)', marginBottom: '0.75rem' }}
+                            />
+                            <p>Message sent! I'll get back to you soon.</p>
+                            <button
+                                className="btn-secondary"
+                                style={{ margin: '1.25rem auto 0', display: 'inline-flex' }}
+                                onClick={() => setSubmitted(false)}
+                            >
+                                Send another
+                            </button>
+                        </div>
+                    ) : (
+                        <>
+                            <h2 className="form-title">Send a Message</h2>
+                            <form onSubmit={handleSubmit} noValidate>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                                    <div className="form-group">
+                                        <label className="form-label" htmlFor="name">Name</label>
+                                        <input
+                                            id="name" name="name" type="text"
+                                            className="form-input" placeholder="Your Name"
+                                            value={form.name} onChange={handleChange} required
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label className="form-label" htmlFor="email">Email</label>
+                                        <input
+                                            id="email" name="email" type="email"
+                                            className="form-input" placeholder="you@example.com"
+                                            value={form.email} onChange={handleChange} required
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="form-group">
+                                    <label className="form-label" htmlFor="subject">Subject</label>
+                                    <input
+                                        id="subject" name="subject" type="text"
+                                        className="form-input" placeholder="What's this about?"
+                                        value={form.subject} onChange={handleChange}
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label className="form-label" htmlFor="message">Message</label>
+                                    <textarea
+                                        id="message" name="message"
+                                        className="form-textarea"
+                                        placeholder="Tell me about your project or collaboration idea..."
+                                        value={form.message} onChange={handleChange} required
+                                    />
+                                </div>
+
+                                <button type="submit" className="form-submit" id="submit-contact-form">
+                                    Send Message <MdSend style={{ marginLeft: '0.25rem' }} />
+                                </button>
+                            </form>
+                        </>
+                    )}
+                </div>
+            </div>
+        </main>
+    )
 }
-
-export default ContactPage
