@@ -1,5 +1,163 @@
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* =============================================
+   GLOBAL DESIGN SYSTEM — DUAL THEME
+   Pure, decent color palette. No neon.
+   ============================================= */
 
-body { min-height: 100vh; background: #ffffff; }
+/* ── DARK THEME (default) ── */
+:root,
+[data-theme="dark"] {
+  --clr-bg-base: #0c0c12;
+  --clr-bg-surface: #13131e;
+  --clr-bg-elevated: #1c1c2b;
+  --clr-bg-overlay: #232336;
 
-#root { min-height: 100vh; }
+  --clr-glass: rgba(255, 255, 255, 0.04);
+  --clr-glass-border: rgba(255, 255, 255, 0.08);
+  --clr-glass-hover: rgba(255, 255, 255, 0.07);
+
+  --clr-text-primary: #ededf5;
+  --clr-text-secondary: #a8a5c2;
+  --clr-text-muted: #5f5d7e;
+
+  /* Brand — indigo / slate-blue, no neon */
+  --clr-primary: #5b5ef4;
+  /* indigo */
+  --clr-primary-dim: #4041bb;
+  --clr-primary-soft: #8385fa;
+  /* lighter indigo for text */
+  --clr-primary-tint: rgba(91, 94, 244, 0.18);
+  --clr-primary-glow: rgba(91, 94, 244, 0.22);
+
+  --clr-accent: #3b82f6;
+  /* pure blue */
+  --clr-accent-soft: #93c5fd;
+  --clr-accent-tint: rgba(59, 130, 246, 0.15);
+
+  /* SideRays colors — warm gold + cool blue, decent */
+  --rays-color1: #c8a44a;
+  /* warm muted gold */
+  --rays-color2: #4a7ec8;
+  /* muted steel-blue */
+  --rays-opacity: 0.75;
+
+  --nav-blur-bg: rgba(12, 12, 18, 0.82);
+  --footer-bg: #10101a;
+
+  color-scheme: dark;
+}
+
+/* ── LIGHT THEME ── */
+[data-theme="light"] {
+  --clr-bg-base: #f4f4f8;
+  --clr-bg-surface: #ffffff;
+  --clr-bg-elevated: #ebebf3;
+  --clr-bg-overlay: #e0e0ec;
+
+  --clr-glass: rgba(255, 255, 255, 0.72);
+  --clr-glass-border: rgba(0, 0, 0, 0.08);
+  --clr-glass-hover: rgba(255, 255, 255, 0.9);
+
+  --clr-text-primary: #14141f;
+  --clr-text-secondary: #4a4869;
+  --clr-text-muted: #8886a8;
+
+  --clr-primary: #4344d6;
+  --clr-primary-dim: #3132aa;
+  --clr-primary-soft: #5b5ef4;
+  --clr-primary-tint: rgba(67, 68, 214, 0.10);
+  --clr-primary-glow: rgba(67, 68, 214, 0.15);
+
+  --clr-accent: #1d6fd8;
+  --clr-accent-soft: #2563eb;
+  --clr-accent-tint: rgba(29, 111, 216, 0.12);
+
+  --rays-color1: #c8a44a;
+  --rays-color2: #4a7ec8;
+  --rays-opacity: 0.55;
+
+  --nav-blur-bg: rgba(244, 244, 248, 0.88);
+  --footer-bg: #ebebf3;
+
+  color-scheme: light;
+}
+
+/* ── BASE RESET ── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body {
+  font-family: 'Outfit', 'Space Grotesk', system-ui, sans-serif;
+  background-color: var(--clr-bg-base);
+  color: var(--clr-text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  line-height: 1.65;
+  transition: background-color 0.35s ease, color 0.35s ease;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--clr-bg-surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--clr-primary);
+  border-radius: 99px;
+  opacity: 0.6;
+}
+
+/* Selection */
+::selection {
+  background: var(--clr-primary-tint);
+  color: var(--clr-text-primary);
+}
+
+/* App shell */
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-shell>main {
+  flex: 1;
+  padding-top: var(--nav-h, 68px);
+}
+
+/* ── TYPOGRAPHY UTILITIES ── */
+.gradient-text {
+  background: linear-gradient(135deg, var(--clr-primary-soft), var(--clr-accent-soft));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── GLASS CARD ── */
+.glass-card {
+  background: var(--clr-glass);
+  border: 1px solid var(--clr-glass-border);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 18px;
+}
+
+/* ── SECTION CONTAINER ── */
+.section-container {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
