@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react'
-import { NavLink, useLocation } from 'react-router-dom'
 import { useTheme } from '../context/ThemeContext'
 
 const navItems = [
-    { label: 'Home', to: '/' },
-    { label: 'About', to: '/about' },
-    { label: 'Skills', to: '/skills' },
+    { label: 'Home',     id: 'home'     },
+    { label: 'About',    id: 'about'    },
+    { label: 'Skills',   id: 'skills'   },
+    { label: 'Projects', id: 'projects' },
 ]
 
-/* Sun / Moon SVG icons — inline, no extra deps */
 function SunIcon() {
     return (
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
@@ -35,21 +34,43 @@ function MoonIcon() {
     )
 }
 
+function scrollTo(id) {
+    const el = document.getElementById(id)
+    if (!el) return
+    const navH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')) || 68
+    const top = el.getBoundingClientRect().top + window.scrollY - navH
+    window.scrollTo({ top, behavior: 'smooth' })
+}
+
 export default function Navbar() {
     const [scrolled, setScrolled] = useState(false)
-    const [open, setOpen] = useState(false)
-    const location = useLocation()
-    const { theme, toggle } = useTheme()
+    const [active, setActive]     = useState('home')
+    const [open, setOpen]         = useState(false)
+    const { theme, toggle }       = useTheme()
 
-    // Close mobile menu on route change
-    useEffect(() => { setOpen(false) }, [location])
-
-    // Detect scroll
     useEffect(() => {
-        const handler = () => setScrolled(window.scrollY > 20)
-        window.addEventListener('scroll', handler, { passive: true })
-        return () => window.removeEventListener('scroll', handler)
+        const onScroll = () => {
+            setScrolled(window.scrollY > 20)
+
+            // Highlight active section based on scroll position
+            const ids = ['home', 'about', 'skills', 'projects', 'contact']
+            const navH = 68
+            for (let i = ids.length - 1; i >= 0; i--) {
+                const el = document.getElementById(ids[i])
+                if (el && el.getBoundingClientRect().top <= navH + 40) {
+                    setActive(ids[i])
+                    break
+                }
+            }
+        }
+        window.addEventListener('scroll', onScroll, { passive: true })
+        return () => window.removeEventListener('scroll', onScroll)
     }, [])
+
+    const handleNav = (id) => {
+        scrollTo(id)
+        setOpen(false)
+    }
 
     return (
         <nav
@@ -59,43 +80,37 @@ export default function Navbar() {
         >
             <div className="navbar-inner">
 
-                {/* ── Brand ── */}
-                <NavLink to="/" className="nav-brand" aria-label="Go to home">
+                {/* Brand */}
+                <button className="nav-brand" onClick={() => handleNav('home')} aria-label="Go to top">
                     <div className="nav-logo-box">A</div>
                     <span className="nav-brand-name">Aayush<span>.dev</span></span>
-                </NavLink>
+                </button>
 
-                {/* ── Nav Links ── */}
+                {/* Nav links */}
                 <ul className={`nav-links${open ? ' open' : ''}`} role="list">
                     {navItems.map(item => (
-                        <li key={item.to}>
-                            <NavLink
-                                to={item.to}
-                                end={item.to === '/'}
-                                className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
+                        <li key={item.id}>
+                            <button
+                                className={`nav-link${active === item.id ? ' active' : ''}`}
+                                onClick={() => handleNav(item.id)}
                             >
                                 {item.label}
-                            </NavLink>
+                            </button>
                         </li>
                     ))}
-
-                    {/* Contact CTA */}
                     <li>
-                        <NavLink
-                            to="/contact"
-                            className={({ isActive }) => `nav-link nav-cta${isActive ? ' active' : ''}`}
+                        <button
+                            className={`nav-link nav-cta${active === 'contact' ? ' active' : ''}`}
+                            onClick={() => handleNav('contact')}
                         >
                             Contact Me
-                        </NavLink>
+                        </button>
                     </li>
                 </ul>
 
-                {/* ── Right controls ── */}
+                {/* Right controls */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-
-                    {/* Theme toggle */}
                     <button
-                        id="theme-toggle-btn"
                         className="theme-toggle"
                         onClick={toggle}
                         aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
@@ -104,16 +119,13 @@ export default function Navbar() {
                         {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
                     </button>
 
-                    {/* Hamburger — mobile only */}
                     <button
                         className={`nav-hamburger${open ? ' open' : ''}`}
                         onClick={() => setOpen(o => !o)}
                         aria-label={open ? 'Close menu' : 'Open menu'}
                         aria-expanded={open}
                     >
-                        <span />
-                        <span />
-                        <span />
+                        <span /><span /><span />
                     </button>
                 </div>
 
