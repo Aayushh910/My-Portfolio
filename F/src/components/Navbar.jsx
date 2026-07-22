@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { NavLink } from 'react-router-dom'
 import { useTheme } from '../context/ThemeContext'
 
 const navItems = [
-    { label: 'Home',     id: 'home'     },
-    { label: 'About',    id: 'about'    },
-    { label: 'Skills',   id: 'skills'   },
-    { label: 'Projects', id: 'projects' },
+    { label: 'Home',     path: '/'         },
+    { label: 'About',    path: '/about'    },
+    { label: 'Skills',   path: '/skills'   },
+    { label: 'Projects', path: '/projects' },
 ]
 
 function SunIcon() {
@@ -34,43 +35,10 @@ function MoonIcon() {
     )
 }
 
-function scrollTo(id) {
-    const el = document.getElementById(id)
-    if (!el) return
-    const navH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')) || 68
-    const top = el.getBoundingClientRect().top + window.scrollY - navH
-    window.scrollTo({ top, behavior: 'smooth' })
-}
-
 export default function Navbar() {
-    const [scrolled, setScrolled] = useState(false)
-    const [active, setActive]     = useState('home')
-    const [open, setOpen]         = useState(false)
-    const { theme, toggle }       = useTheme()
-
-    useEffect(() => {
-        const onScroll = () => {
-            setScrolled(window.scrollY > 20)
-
-            // Highlight active section based on scroll position
-            const ids = ['home', 'about', 'skills', 'projects', 'contact']
-            const navH = 68
-            for (let i = ids.length - 1; i >= 0; i--) {
-                const el = document.getElementById(ids[i])
-                if (el && el.getBoundingClientRect().top <= navH + 40) {
-                    setActive(ids[i])
-                    break
-                }
-            }
-        }
-        window.addEventListener('scroll', onScroll, { passive: true })
-        return () => window.removeEventListener('scroll', onScroll)
-    }, [])
-
-    const handleNav = (id) => {
-        scrollTo(id)
-        setOpen(false)
-    }
+    const [scrolled] = useState(false)
+    const [open, setOpen]   = useState(false)
+    const { theme, toggle } = useTheme()
 
     return (
         <nav
@@ -81,30 +49,33 @@ export default function Navbar() {
             <div className="navbar-inner">
 
                 {/* Brand */}
-                <button className="nav-brand" onClick={() => handleNav('home')} aria-label="Go to top">
+                <NavLink to="/" className="nav-brand" aria-label="Go to home">
                     <div className="nav-logo-box">A</div>
                     <span className="nav-brand-name">Aayush<span>.dev</span></span>
-                </button>
+                </NavLink>
 
                 {/* Nav links */}
                 <ul className={`nav-links${open ? ' open' : ''}`} role="list">
                     {navItems.map(item => (
-                        <li key={item.id}>
-                            <button
-                                className={`nav-link${active === item.id ? ' active' : ''}`}
-                                onClick={() => handleNav(item.id)}
+                        <li key={item.path}>
+                            <NavLink
+                                to={item.path}
+                                end={item.path === '/'}
+                                className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
+                                onClick={() => setOpen(false)}
                             >
                                 {item.label}
-                            </button>
+                            </NavLink>
                         </li>
                     ))}
                     <li>
-                        <button
-                            className={`nav-link nav-cta${active === 'contact' ? ' active' : ''}`}
-                            onClick={() => handleNav('contact')}
+                        <NavLink
+                            to="/contact"
+                            className={({ isActive }) => `nav-link nav-cta${isActive ? ' active' : ''}`}
+                            onClick={() => setOpen(false)}
                         >
                             Contact Me
-                        </button>
+                        </NavLink>
                     </li>
                 </ul>
 

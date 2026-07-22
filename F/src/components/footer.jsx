@@ -1,9 +1,4 @@
-function scrollTo(id) {
-  const el = document.getElementById(id)
-  if (!el) return
-  const navH = 68
-  window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - navH, behavior: 'smooth' })
-}
+import { Link } from 'react-router-dom'
 
 export default function Footer() {
   const year = new Date().getFullYear()
@@ -45,15 +40,15 @@ export default function Footer() {
           <p className="footer-col-heading">Quick Links</p>
           <nav className="footer-nav">
             {[
-              { label: 'Home',     id: 'home'     },
-              { label: 'About',    id: 'about'    },
-              { label: 'Projects', id: 'projects' },
-              { label: 'Skills',   id: 'skills'   },
-              { label: 'Contact',  id: 'contact'  },
+              { label: 'Home',     path: '/'         },
+              { label: 'About',    path: '/about'    },
+              { label: 'Projects', path: '/projects' },
+              { label: 'Skills',   path: '/skills'   },
+              { label: 'Contact',  path: '/contact'  },
             ].map(l => (
-              <button key={l.label} className="footer-nav-btn" onClick={() => scrollTo(l.id)}>
+              <Link key={l.label} to={l.path} className="footer-nav-btn">
                 {l.label}
-              </button>
+              </Link>
             ))}
           </nav>
         </div>
