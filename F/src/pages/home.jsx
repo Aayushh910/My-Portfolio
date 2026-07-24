@@ -1,51 +1,23 @@
-import { useTheme } from '../context/ThemeContext'
-import SideRays from '../components/SideRays'
-
-function scrollTo(id) {
-    const el = document.getElementById(id)
-    if (!el) return
-    window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 68, behavior: 'smooth' })
-}
-
-/* Ray colors tuned per theme — decent, no neon */
-const RAY_CONFIG = {
-    dark: {
-        rayColor1: '#c8a44a',   // warm muted gold
-        rayColor2: '#4a7ec8',   // muted steel-blue
-        intensity: 1.8,
-        opacity: 0.70,
-    },
-    light: {
-        rayColor1: '#b8942e',   // deeper gold for light bg
-        rayColor2: '#3568b0',   // deeper blue for light bg
-        intensity: 1.2,
-        opacity: 0.45,
-    },
-}
+import ShapeGrid from '../components/ShapeGrid'
 
 export default function HomePage() {
-    const { theme } = useTheme()
-    const rays = RAY_CONFIG[theme]
-
     return (
         <section className="home-hero" aria-label="Hero section">
 
-            {/* ── SideRays WebGL background ── */}
-            <SideRays
-                speed={1.6}
-                rayColor1={rays.rayColor1}
-                rayColor2={rays.rayColor2}
-                intensity={rays.intensity}
-                spread={2.2}
-                origin="top-right"
-                tilt={0}
-                saturation={1.2}
-                blend={0.68}
-                falloff={1.8}
-                opacity={rays.opacity}
-            />
+            {/* ── ShapeGrid canvas background ── */}
+            <div className="shapegrid-bg">
+                <ShapeGrid
+                    speed={0.15}
+                    squareSize={55}
+                    direction="right"
+                    borderColor="rgba(255,255,255,0.08)"
+                    hoverFillColor="#5B5EF4"
+                    shape="square"
+                    hoverTrailAmount={20}
+                />
+            </div>
 
-            {/* Subtle radial wash over the rays */}
+            {/* Subtle radial wash over the grid */}
             <div className="hero-bg-wash" aria-hidden="true" />
 
             {/* Dot grid */}
@@ -74,12 +46,12 @@ export default function HomePage() {
                 </p>
 
                 <div className="hero-actions">
-                    <button className="btn-primary" onClick={() => scrollTo('contact')}>
+                    <a className="btn-primary" href="/contact">
                         Let's Talk →
-                    </button>
-                    <button className="btn-secondary" onClick={() => scrollTo('about')}>
+                    </a>
+                    <a className="btn-secondary" href="/about">
                         Learn More
-                    </button>
+                    </a>
                 </div>
             </div>
 
