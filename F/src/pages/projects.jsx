@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react'
 import { SiGithub } from 'react-icons/si'
-import { FiExternalLink, FiStar, FiGitBranch, FiClock } from 'react-icons/fi'
+import { FiExternalLink, FiStar, FiGitBranch } from 'react-icons/fi'
 
 const GITHUB_USER = 'Aayushh910'
 const API_URL = `https://api.github.com/users/${GITHUB_USER}/starred?per_page=100`
 
 const statusMeta = {
-    Live:          { bg: 'rgba(22,163,74,0.12)',  border: 'rgba(22,163,74,0.3)',  text: '#16a34a', glow: 'rgba(22,163,74,0.2)' },
-    Completed:     { bg: 'rgba(59,130,246,0.12)', border: 'rgba(59,130,246,0.3)', text: '#3b82f6', glow: 'rgba(59,130,246,0.2)' },
-    'In Progress': { bg: 'rgba(234,179,8,0.12)',  border: 'rgba(234,179,8,0.3)',  text: '#ca8a04', glow: 'rgba(234,179,8,0.2)' },
+    Live:          { bg: 'rgba(22,163,74,0.1)',  border: 'rgba(22,163,74,0.3)',  text: '#16a34a' },
+    Completed:     { bg: 'rgba(59,130,246,0.1)', border: 'rgba(59,130,246,0.3)', text: '#3b82f6' },
+    'In Progress': { bg: 'rgba(234,179,8,0.1)',  border: 'rgba(234,179,8,0.3)',  text: '#f59e0b' },
 }
 
 const langColors = {
@@ -27,10 +27,9 @@ function deriveStatus(repo) {
 function timeAgo(dateStr) {
     const days = Math.round((Date.now() - new Date(dateStr)) / 86400000)
     if (days === 0) return 'Today'
-    if (days === 1) return '1 day ago'
-    if (days < 30)  return `${days} days ago`
+    if (days < 30)  return `${days}d ago`
     const mo = Math.round(days / 30)
-    return mo === 1 ? '1 month ago' : `${mo} months ago`
+    return `${mo}mo ago`
 }
 
 export default function ProjectsPage() {
@@ -50,7 +49,7 @@ export default function ProjectsPage() {
                 title:       r.name.replace(/[-_]/g, ' '),
                 description: r.description || 'No description provided.',
                 language:    r.language || null,
-                topics:      r.topics?.slice(0, 4) ?? [],
+                topics:      r.topics?.slice(0, 5) ?? [],
                 github:      r.html_url,
                 live:        r.homepage || '',
                 stars:       r.stargazers_count,
@@ -77,106 +76,99 @@ export default function ProjectsPage() {
 
             {error && <p className="projects-error">⚠ {error}</p>}
 
-            {loading && (
-                <div className="projects-grid section-container">
-                    {Array.from({ length: 6 }).map((_, i) => (
-                        <div key={i} className="project-card pc-skeleton">
-                            <div className="pcs-banner" />
-                            <div className="pcs-body">
-                                <div className="pcs-line pcs-w60" />
-                                <div className="pcs-line pcs-w90" style={{ height: '1.1rem' }} />
-                                <div className="pcs-line pcs-w100" />
-                                <div className="pcs-line pcs-w80" />
-                            </div>
+            <div className="projects-grid section-container">
+
+                {loading && Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="project-card pc-skeleton">
+                        <div className="pcs-top">
+                            <div className="pcs-line pcs-w40" />
+                            <div className="pcs-line pcs-w20" />
                         </div>
-                    ))}
-                </div>
-            )}
+                        <div className="pcs-line pcs-w70" style={{ height: '1.5rem', marginBottom: '0.75rem' }} />
+                        <div className="pcs-line pcs-w100" />
+                        <div className="pcs-line pcs-w90" />
+                        <div className="pcs-line pcs-w60" style={{ marginTop: '1.25rem' }} />
+                    </div>
+                ))}
 
-            {!loading && !error && (
-                <div className="projects-grid section-container">
-                    {repos.map((p, i) => {
-                        const s  = statusMeta[p.status] ?? statusMeta.Completed
-                        const lc = langColors[p.language] ?? '#8385fa'
+                {!loading && !error && repos.map((p, i) => {
+                    const s  = statusMeta[p.status] ?? statusMeta.Completed
+                    const lc = langColors[p.language] ?? 'var(--clr-primary-soft)'
 
-                        return (
-                            <article
-                                key={p.name}
-                                className="project-card"
-                                style={{ animationDelay: `${i * 0.06}s` }}
-                            >
-                                {/* ── Banner ── */}
-                                <div className="pc-banner" style={{ '--lc': lc }}>
-                                    <div className="pc-banner-dots">
-                                        <span /><span /><span />
-                                    </div>
-                                    <div className="pc-banner-center">
-                                        {p.language && (
-                                            <span className="pc-banner-lang">
-                                                <span className="pc-lang-dot" style={{ background: lc }} />
-                                                {p.language}
-                                            </span>
-                                        )}
-                                    </div>
-                                    <div className="pc-banner-actions">
-                                        <a href={p.github} target="_blank" rel="noreferrer"
-                                            className="pc-action-btn" aria-label="GitHub">
-                                            <SiGithub />
-                                        </a>
-                                        {p.live && (
-                                            <a href={p.live} target="_blank" rel="noreferrer"
-                                                className="pc-action-btn pc-action-live" aria-label="Live">
-                                                <FiExternalLink />
-                                            </a>
-                                        )}
-                                    </div>
-                                </div>
+                    return (
+                        <article
+                            key={p.name}
+                            className="project-card"
+                            style={{ animationDelay: `${i * 0.07}s` }}
+                        >
+                            {/* accent line */}
+                            <div className="pc-accent-line" />
 
-                                {/* ── Body ── */}
-                                <div className="pc-body">
-                                    <div className="pc-title-row">
-                                        <h2 className="project-title">{p.title}</h2>
-                                        <span
-                                            className="pc-status-badge"
-                                            style={{ background: s.bg, border: `1px solid ${s.border}`, color: s.text }}
-                                        >
-                                            <span className="pc-status-dot" style={{ background: s.text, boxShadow: `0 0 5px ${s.glow}` }} />
-                                            {p.status}
+                            {/* ── Top row: lang + status + links ── */}
+                            <div className="pc-top">
+                                <div className="pc-top-left">
+                                    {p.language && (
+                                        <span className="pc-lang">
+                                            <span className="pc-lang-dot" style={{ background: lc }} />
+                                            {p.language}
                                         </span>
-                                    </div>
-
-                                    <p className="project-desc">{p.description}</p>
-
-                                    {p.topics.length > 0 && (
-                                        <div className="pc-topics">
-                                            {p.topics.map(t => (
-                                                <span key={t} className="pc-topic">{t}</span>
-                                            ))}
-                                        </div>
                                     )}
-                                </div>
-
-                                {/* ── Footer ── */}
-                                <div className="pc-footer">
-                                    <div className="pc-stats">
-                                        <span className="pc-stat" title="Stars">
-                                            <FiStar /> {p.stars}
-                                        </span>
-                                        <span className="pc-stat" title="Forks">
-                                            <FiGitBranch /> {p.forks}
-                                        </span>
-                                    </div>
-                                    <span className="pc-time">
-                                        <FiClock /> {timeAgo(p.updatedAt)}
+                                    <span
+                                        className="pc-status"
+                                        style={{ background: s.bg, border: `1px solid ${s.border}`, color: s.text }}
+                                    >
+                                        <span className="pc-status-dot" style={{ background: s.text }} />
+                                        {p.status}
                                     </span>
                                 </div>
+                                <div className="pc-links">
+                                    <a href={p.github} target="_blank" rel="noreferrer"
+                                        className="pc-link-btn" aria-label="GitHub">
+                                        <SiGithub />
+                                    </a>
+                                    {p.live && (
+                                        <a href={p.live} target="_blank" rel="noreferrer"
+                                            className="pc-link-btn pc-link-live" aria-label="Live demo">
+                                            <FiExternalLink />
+                                            <span>Live</span>
+                                        </a>
+                                    )}
+                                </div>
+                            </div>
 
-                            </article>
-                        )
-                    })}
-                </div>
-            )}
+                            {/* ── Title + description ── */}
+                            <div className="pc-body">
+                                <h2 className="pc-title">{p.title}</h2>
+                                <p className="pc-desc">{p.description}</p>
+                            </div>
 
+                            {/* ── Topics ── */}
+                            {p.topics.length > 0 && (
+                                <div className="pc-topics">
+                                    {p.topics.map(t => (
+                                        <span key={t} className="pc-topic">{t}</span>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* ── Footer ── */}
+                            <div className="pc-footer">
+                                <div className="pc-stats">
+                                    <span className="pc-stat">
+                                        <FiStar /> {p.stars} <span className="pc-stat-label">stars</span>
+                                    </span>
+                                    <span className="pc-stat">
+                                        <FiGitBranch /> {p.forks} <span className="pc-stat-label">forks</span>
+                                    </span>
+                                </div>
+                                <span className="pc-updated">Updated {timeAgo(p.updatedAt)}</span>
+                            </div>
+
+                        </article>
+                    )
+                })}
+
+            </div>
         </div>
     )
 }
