@@ -1,32 +1,13 @@
-// ============================================
-// Task Management REST API - Main Server File
-// ============================================
-// This is the entry point of the application.
-// It sets up Express, registers middleware, and starts the server.
-
-// Step 1: Import Express
 var express = require("express");
-
-// Step 2: Create an Express application
-var app = express();
-
-// Step 3: Import middleware
 var logger = require("./middleware/logger");
 var errorHandler = require("./middleware/errorHandler");
-
-// Step 4: Import routes
 var taskRoutes = require("./routes/taskRoutes");
 
-// Step 5: Use express.json() to parse JSON request bodies
-// This allows us to read req.body in POST and PUT requests
-app.use(express.json());
+var app = express();
 
-// Step 6: Use the logger middleware for every request
-// This must come BEFORE the routes
+app.use(express.json());
 app.use(logger);
 
-// Step 7: Homepage route
-// Displays a simple informational HTML page at http://localhost:3000/
 app.get("/", function (req, res) {
   var html =
     "<!DOCTYPE html>" +
@@ -63,18 +44,11 @@ app.get("/", function (req, res) {
   res.status(200).send(html);
 });
 
-// Step 8: Use the task routes
-// All routes defined in taskRoutes will be prefixed with /tasks
 app.use("/tasks", taskRoutes);
-
-// Step 9: Use the error handler middleware
-// This must be the LAST middleware registered
 app.use(errorHandler);
 
-// Step 10: Define the port number
 var PORT = 3000;
 
-// Step 11: Start the server
 app.listen(PORT, function () {
   console.log("Server running on port " + PORT);
 });

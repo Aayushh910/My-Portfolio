@@ -247,13 +247,3 @@ Response:
 | 404  | Not Found             | PUT, DELETE      |
 | 500  | Internal Server Error | Error Handler    |
 
----
-
-## Screenshots
-
-> Add Postman screenshots here after testing.
-
-- GET /tasks — Screenshot
-- POST /tasks — Screenshot
-- PUT /tasks/1 — Screenshot
-- DELETE /tasks/1 — Screenshot
