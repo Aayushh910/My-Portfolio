@@ -9,6 +9,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.21.2"
+    "@babel/standalone": "^8.0.4",
+    "express": "^4.21.2",
+    "mongoose": "^9.9.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
   }
 }

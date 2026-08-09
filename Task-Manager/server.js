@@ -1,54 +1,52 @@
 var express = require("express");
+var path = require("path");
+var fs = require("fs");
+
+var connectDB = require("./config/db");
 var logger = require("./middleware/logger");
 var errorHandler = require("./middleware/errorHandler");
 var taskRoutes = require("./routes/taskRoutes");
+var { LOG_FILE_PATH } = require("./middleware/csvLogger");
 
 var app = express();
+
+// Connect to MongoDB
+connectDB();
 
 app.use(express.json());
 app.use(logger);
 
-app.get("/", function (req, res) {
-  var html =
-    "<!DOCTYPE html>" +
-    "<html lang='en'>" +
-    "<head>" +
-    "<meta charset='UTF-8'>" +
-    "<meta name='viewport' content='width=device-width, initial-scale=1.0'>" +
-    "<title>Task Management REST API</title>" +
-    "<style>" +
-    "body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; background: #f5f5f5; }" +
-    "h1 { color: #333; }" +
-    "h2 { color: #555; margin-top: 20px; }" +
-    ".status { color: green; font-weight: bold; }" +
-    "ul { list-style: none; padding: 0; }" +
-    "li { padding: 6px 0; font-family: monospace; font-size: 14px; }" +
-    "p.note { color: #777; margin-top: 20px; font-style: italic; }" +
-    "</style>" +
-    "</head>" +
-    "<body>" +
-    "<h1>Task Management REST API</h1>" +
-    "<h2>Server Status</h2>" +
-    "<p class='status'>Running Successfully</p>" +
-    "<h2>Available Endpoints</h2>" +
-    "<ul>" +
-    "<li>GET /tasks</li>" +
-    "<li>POST /tasks</li>" +
-    "<li>PUT /tasks/:id</li>" +
-    "<li>DELETE /tasks/:id</li>" +
-    "</ul>" +
-    "<p class='note'>Use Postman to test CRUD APIs.</p>" +
-    "</body>" +
-    "</html>";
+// Serve static assets
+app.use("/vendor", express.static(path.join(__dirname, "node_modules")));
+app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(__dirname));
 
-  res.status(200).send(html);
+// Route to render the React Task management page
+app.get("/task", function (req, res) {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+app.get("/", function (req, res) {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+// Route to download or view the CSV log file directly
+app.get("/logs/csv", function (req, res) {
+  if (fs.existsSync(LOG_FILE_PATH)) {
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader("Content-Disposition", 'attachment; filename="task_logs.csv"');
+    res.sendFile(LOG_FILE_PATH);
+  } else {
+    res.status(404).send("No CSV activity log file found yet.");
+  }
 });
 
 app.use("/tasks", taskRoutes);
 app.use(errorHandler);
 
-var PORT = 3000;
+var PORT = process.env.PORT || 3000;
 
 app.listen(PORT, function () {
   console.log("Server running on port " + PORT);
+  console.log("Activity logs CSV endpoint: http://localhost:" + PORT + "/logs/csv");
 });
