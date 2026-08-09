@@ -1,6 +1,15 @@
+const { logToCsv } = require('./csvLogger');
+
 function logger(req, res, next) {
-  var timestamp = new Date().toISOString();
-  console.log(req.method + " " + req.url + " " + timestamp);
+  const timestamp = new Date().toISOString();
+  console.log(`[${timestamp}] ${req.method} ${req.url} - IP: ${req.ip || req.socket.remoteAddress}`);
+
+  // Log general HTTP request
+  logToCsv({
+    req: req,
+    action: 'HTTP_REQUEST'
+  });
+
   next();
 }
 
