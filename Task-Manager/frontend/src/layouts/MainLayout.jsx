@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Sidebar } from '../components/Sidebar';
 import { Navbar } from '../components/Navbar';
 import { TodoModal } from '../components/TodoModal';
 import { todoService } from '../services/todoService';
 import { useNotification } from '../context/NotificationContext';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 
 export const MainLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -52,7 +53,15 @@ export const MainLayout = () => {
         />
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto animate-fade-in">
-          <Outlet />
+          <Suspense
+            fallback={
+              <div className="py-24 flex items-center justify-center">
+                <LoadingSpinner message="Loading content..." size="lg" />
+              </div>
+            }
+          >
+            <Outlet />
+          </Suspense>
         </main>
       </div>
 
