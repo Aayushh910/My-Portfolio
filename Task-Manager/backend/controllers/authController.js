@@ -2,6 +2,17 @@ import jwt from 'jsonwebtoken';
 import { User } from '../models/User.js';
 import { createLog } from '../services/logService.js';
 
+// Password strength validator: >=8 chars, uppercase, lowercase, number, special char
+export const isStrongPassword = (pass) => {
+  if (!pass || typeof pass !== 'string') return false;
+  if (pass.length < 8) return false;
+  const hasUpper = /[A-Z]/.test(pass);
+  const hasLower = /[a-z]/.test(pass);
+  const hasNumber = /[0-9]/.test(pass);
+  const hasSpecial = /[^A-Za-z0-9]/.test(pass);
+  return hasUpper && hasLower && hasNumber && hasSpecial;
+};
+
 export const register = async (req, res) => {
   try {
     const { username, password, email, fullName, avatar } = req.body;
@@ -22,32 +33,50 @@ export const register = async (req, res) => {
       });
     }
 
-    if (password.length < 6) {
+    if (/\s/.test(trimmedUser)) {
       return res.status(400).json({
         success: false,
-        message: 'Password must be at least 6 characters long.',
+        message: 'Username cannot contain whitespace spaces.',
       });
     }
 
-    // Check if username already exists in database
-    const existingUser = await User.findOne({ username: trimmedUser });
+    if (!isStrongPassword(password)) {
+      return res.status(400).json({
+        success: false,
+        message:
+          'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special symbol (!@#$%^&*).',
+      });
+    }
+
+    const cleanEmail = email ? email.trim().toLowerCase() : '';
+
+    // Check if username or email already exists in database
+    const existingUser = await User.findOne({
+      $or: [
+        { username: trimmedUser },
+        ...(cleanEmail ? [{ email: cleanEmail }] : []),
+      ],
+    });
     const adminUser = (process.env.ADMIN_USERNAME || 'admin').toLowerCase();
 
     if (existingUser || trimmedUser === adminUser) {
       return res.status(409).json({
         success: false,
-        message: 'Username is already taken. Please choose another.',
+        message: existingUser?.email === cleanEmail && cleanEmail
+          ? 'Email address is already registered. Please log in instead.'
+          : 'Username is already taken. Please choose another username.',
       });
     }
 
     // Create new user in MongoDB
     const newUser = new User({
       username: trimmedUser,
-      email: email ? email.trim().toLowerCase() : '',
+      email: cleanEmail,
       fullName: fullName ? fullName.trim() : '',
       avatar: avatar || '',
       password,
       role: 'User',
+      authProvider: 'local',
     });
 
     await newUser.save();
@@ -101,67 +130,56 @@ export const login = async (req, res) => {
     if (!username || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Username and password are required.',
+        message: 'Username/email and password are required.',
       });
     }
 
-    const inputUser = username.trim().toLowerCase();
+    const inputIdentifier = username.trim().toLowerCase();
     const adminUser = (process.env.ADMIN_USERNAME || 'admin').toLowerCase();
     const adminPass = process.env.ADMIN_PASSWORD || 'admin123';
 
-    // 1. Check if matches predefined admin from env
-    if (inputUser === adminUser && password === adminPass) {
-      // Find or create admin in User collection to support avatar
-      let adminRecord = await User.findOne({ username: adminUser });
-      if (!adminRecord) {
-        adminRecord = new User({
+    // Search user in MongoDB by username OR email (case-insensitive)
+    let user = await User.findOne({
+      $or: [
+        { username: inputIdentifier },
+        { email: inputIdentifier },
+      ],
+    });
+
+    // Auto-seed admin record if credentials match env admin
+    if (!user && (inputIdentifier === adminUser || inputIdentifier === 'admin@taskflow.dev')) {
+      if (password === adminPass) {
+        user = new User({
           username: adminUser,
+          email: 'admin@taskflow.dev',
           password: adminPass,
           role: 'Administrator',
           fullName: 'System Administrator',
         });
-        await adminRecord.save();
+        await user.save();
       }
-
-      const token = jwt.sign(
-        { id: adminRecord._id, username: adminUser, role: 'Administrator' },
-        process.env.JWT_SECRET || 'fallback_secret',
-        { expiresIn: '7d' }
-      );
-
-      // Record activity log in MongoDB
-      await createLog('LOGIN', `Administrator '${adminUser}' logged in.`, null, adminRecord._id, adminUser);
-
-      return res.status(200).json({
-        success: true,
-        message: 'Login successful',
-        token,
-        user: {
-          id: adminRecord._id,
-          username: adminUser,
-          role: 'Administrator',
-          fullName: adminRecord.fullName || 'System Administrator',
-          email: adminRecord.email || '',
-          bio: adminRecord.bio || '',
-          avatar: adminRecord.avatar || '',
-        },
-      });
     }
 
-    // 2. Check MongoDB User collection
-    const user = await User.findOne({ username: inputUser });
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid username or password.',
+        message: 'Invalid username/email or password.',
       });
     }
 
-    const isMatch = await user.comparePassword(password);
+    // Verify password: check user's bcrypt hash or admin fallback
+    let isMatch = false;
+    if (user.password) {
+      isMatch = await user.comparePassword(password);
+    }
+    if (!isMatch && user.role === 'Administrator' && password === adminPass) {
+      isMatch = true;
+    }
+
     if (!isMatch) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid username or password.',
+        message: 'Invalid username/email or password.',
       });
     }
 
@@ -332,10 +350,11 @@ export const changePassword = async (req, res) => {
       });
     }
 
-    if (newPassword.length < 6) {
+    if (!isStrongPassword(newPassword)) {
       return res.status(400).json({
         success: false,
-        message: 'New password must be at least 6 characters long.',
+        message:
+          'New password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special symbol (!@#$%^&*).',
       });
     }
 
@@ -385,3 +404,310 @@ export const changePassword = async (req, res) => {
     });
   }
 };
+
+export const forgotPassword = async (req, res) => {
+  try {
+    const { identifier } = req.body;
+
+    if (!identifier || !identifier.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide your registered email address or username.',
+      });
+    }
+
+    const cleanId = identifier.trim().toLowerCase();
+
+    // Find user by either username or email
+    const user = await User.findOne({
+      $or: [{ username: cleanId }, { email: cleanId }],
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'No account found matching that email or username.',
+      });
+    }
+
+    // Generate 6-digit verification code
+    const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    user.resetPasswordToken = resetCode;
+    user.resetPasswordExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 mins expiry
+    await user.save();
+
+    await createLog(
+      'PASSWORD_RESET_REQUESTED',
+      `Password reset code requested for '${user.username}'.`,
+      null,
+      user._id,
+      user.username
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: 'Password reset code generated. Use the code below to reset your password.',
+      resetCode,
+      username: user.username,
+      email: user.email,
+    });
+  } catch (error) {
+    console.error('[AuthController] ForgotPassword Error:', error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to process forgot password request.',
+    });
+  }
+};
+
+export const resetPassword = async (req, res) => {
+  try {
+    const { identifier, resetCode, newPassword } = req.body;
+
+    if (!identifier || !resetCode || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Identifier, reset code, and new password are required.',
+      });
+    }
+
+    if (!isStrongPassword(newPassword)) {
+      return res.status(400).json({
+        success: false,
+        message:
+          'New password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special symbol (!@#$%^&*).',
+      });
+    }
+
+    const cleanId = identifier.trim().toLowerCase();
+
+    const user = await User.findOne({
+      $or: [{ username: cleanId }, { email: cleanId }],
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User account not found.',
+      });
+    }
+
+    if (!user.resetPasswordToken || user.resetPasswordToken !== resetCode.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid reset code. Please check and try again.',
+      });
+    }
+
+    if (!user.resetPasswordExpires || new Date() > user.resetPasswordExpires) {
+      return res.status(400).json({
+        success: false,
+        message: 'Reset code has expired. Please request a new code.',
+      });
+    }
+
+    user.password = newPassword;
+    user.resetPasswordToken = null;
+    user.resetPasswordExpires = null;
+    await user.save();
+
+    await createLog(
+      'PASSWORD_RESET_COMPLETED',
+      `Password successfully reset for '${user.username}'.`,
+      null,
+      user._id,
+      user.username
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: 'Password has been reset successfully. You can now log in.',
+    });
+  } catch (error) {
+    console.error('[AuthController] ResetPassword Error:', error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to reset password.',
+    });
+  }
+};
+
+export const googleAuth = async (req, res) => {
+  try {
+    const { credential, accessToken } = req.body;
+
+    let gEmail = req.body.email;
+    let gName = req.body.name;
+    let gAvatar = req.body.avatar;
+    let gId = req.body.googleId;
+
+    // 1. If an OAuth2 access token is provided, verify it directly with Google UserInfo API
+    if (accessToken && (!gEmail || !gId)) {
+      try {
+        const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        if (userInfoRes.ok) {
+          const uInfo = await userInfoRes.json();
+          gEmail = uInfo.email || gEmail;
+          gName = uInfo.name || uInfo.given_name || gName;
+          gAvatar = uInfo.picture || gAvatar;
+          gId = uInfo.sub || gId;
+        }
+      } catch (tokenErr) {
+        console.warn('[GoogleAuth] Google userinfo fetch warning:', tokenErr.message);
+      }
+    }
+
+    // 2. Decode and verify Google ID Token (credential) if passed
+    if (credential) {
+      // First try Google's official tokeninfo endpoint
+      try {
+        const verifyRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`);
+        if (verifyRes.ok) {
+          const verified = await verifyRes.json();
+          gEmail = verified.email || gEmail;
+          gName = verified.name || verified.given_name || gName;
+          gAvatar = verified.picture || gAvatar;
+          gId = verified.sub || gId;
+        }
+      } catch (verifyErr) {
+        console.warn('[GoogleAuth] Google tokeninfo verify warning:', verifyErr.message);
+      }
+
+      // Fallback: Parse JWT payload via base64url
+      if (!gEmail && !gId) {
+        try {
+          const parts = credential.split('.');
+          if (parts.length === 3) {
+            let payload = null;
+            try {
+              payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf-8'));
+            } catch (b64urlErr) {
+              const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+              payload = JSON.parse(Buffer.from(base64, 'base64').toString('utf-8'));
+            }
+
+            if (payload) {
+              // Verify expiration
+              if (payload.exp && Date.now() >= payload.exp * 1000) {
+                return res.status(401).json({
+                  success: false,
+                  message: 'Google authentication session expired. Please sign in again.',
+                });
+              }
+
+              gEmail = payload.email || gEmail;
+              gName = payload.name || payload.given_name || gName;
+              gAvatar = payload.picture || gAvatar;
+              gId = payload.sub || gId;
+            }
+          }
+        } catch (err) {
+          console.warn('[GoogleAuth] Local JWT decode warning:', err.message);
+        }
+      }
+    }
+
+    if (!gEmail && !gId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Google authentication requires email or Google ID.',
+      });
+    }
+
+    const cleanEmail = gEmail ? gEmail.trim().toLowerCase() : '';
+
+    // Check if user exists by googleId or email
+    let user = null;
+    if (gId) {
+      user = await User.findOne({ googleId: gId });
+    }
+    if (!user && cleanEmail) {
+      user = await User.findOne({ email: cleanEmail });
+    }
+
+    if (user) {
+      // Update Google ID and avatar if needed
+      if (!user.googleId && gId) user.googleId = gId;
+      if (!user.avatar && gAvatar) user.avatar = gAvatar;
+      if (!user.fullName && gName) user.fullName = gName;
+      if (user.authProvider !== 'google' && !user.authProvider) user.authProvider = 'google';
+      await user.save();
+    } else {
+      // Create new user for this Google account
+      let baseUsername = (
+        cleanEmail ? cleanEmail.split('@')[0] : (gName || 'google_user').replace(/\s+/g, '').toLowerCase()
+      )
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '');
+
+      if (baseUsername.length < 3) baseUsername = 'user_' + Math.floor(100 + Math.random() * 900);
+
+      let candidateUsername = baseUsername;
+      let suffix = 1;
+      while (await User.findOne({ username: candidateUsername })) {
+        candidateUsername = `${baseUsername}${suffix++}`;
+      }
+
+      const randomPassword = 'G_' + Math.random().toString(36).slice(-10) + '!' + Date.now();
+
+      user = new User({
+        username: candidateUsername,
+        email: cleanEmail,
+        fullName: gName || '',
+        avatar: gAvatar || '',
+        googleId: gId || `google_${Date.now()}`,
+        authProvider: 'google',
+        password: randomPassword,
+        role: 'User',
+      });
+
+      await user.save();
+
+      await createLog(
+        'USER_REGISTERED',
+        `New user registered via Google Auth: '${candidateUsername}'`,
+        null,
+        user._id,
+        user.username
+      );
+    }
+
+    // Sign JWT token for the user
+    const token = jwt.sign(
+      {
+        id: user._id,
+        username: user.username,
+        role: user.role,
+      },
+      process.env.JWT_SECRET || 'fallback_secret',
+      { expiresIn: '7d' }
+    );
+
+    await createLog('LOGIN', `User '${user.username}' logged in via Google Auth.`, null, user._id, user.username);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Google authentication successful',
+      token,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        fullName: user.fullName || '',
+        bio: user.bio || '',
+        avatar: user.avatar || '',
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    console.error('[AuthController] GoogleAuth Error:', error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Internal server error during Google authentication.',
+    });
+  }
+};
+

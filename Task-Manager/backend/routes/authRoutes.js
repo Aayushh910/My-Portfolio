@@ -6,6 +6,9 @@ import {
   getMe,
   updateProfile,
   changePassword,
+  forgotPassword,
+  resetPassword,
+  googleAuth,
 } from '../controllers/authController.js';
 import { requireAuth } from '../middleware/authMiddleware.js';
 
@@ -14,6 +17,9 @@ const router = express.Router();
 router.post('/register', register);
 router.post('/login', login);
 router.post('/logout', requireAuth, logout);
+router.post('/forgot-password', forgotPassword);
+router.post('/reset-password', resetPassword);
+router.post('/google', googleAuth);
 router.get('/me', requireAuth, getMe);
 router.put('/profile', requireAuth, updateProfile);
 router.put('/password', requireAuth, changePassword);

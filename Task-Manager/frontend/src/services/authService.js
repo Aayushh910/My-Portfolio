@@ -36,4 +36,24 @@ export const authService = {
     const response = await api.put('/auth/password', passwordData);
     return response.data;
   },
+
+  forgotPassword: async (identifier) => {
+    const response = await api.post('/auth/forgot-password', { identifier });
+    return response.data;
+  },
+
+  resetPassword: async (identifier, resetCode, newPassword) => {
+    const response = await api.post('/auth/reset-password', {
+      identifier,
+      resetCode,
+      newPassword,
+    });
+    return response.data;
+  },
+
+  googleAuth: async (payload) => {
+    const response = await api.post('/auth/google', payload);
+    return response.data;
+  },
 };
+

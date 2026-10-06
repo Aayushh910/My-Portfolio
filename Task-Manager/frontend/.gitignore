@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Environment files with private secrets
+.env
+.env.local
+.env.*.local
+*.env
+
+# Production build output
+dist/
+dist-ssr/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS & Editor
+.DS_Store
+.vscode/
+.idea/

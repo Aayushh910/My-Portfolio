@@ -53,6 +53,18 @@ export const AuthProvider = ({ children }) => {
     throw new Error(res.message || 'Login failed');
   };
 
+  const googleLogin = async (payload) => {
+    const res = await authService.googleAuth(payload);
+    if (res.success && res.token) {
+      setToken(res.token);
+      setUser(res.user);
+      localStorage.setItem('todo_auth_token', res.token);
+      localStorage.setItem('todo_auth_user', JSON.stringify(res.user));
+      return res;
+    }
+    throw new Error(res.message || 'Google authentication failed');
+  };
+
   const updateUser = (updatedUser) => {
     setUser(updatedUser);
     localStorage.setItem('todo_auth_user', JSON.stringify(updatedUser));
@@ -84,6 +96,7 @@ export const AuthProvider = ({ children }) => {
         isLoading,
         login,
         register,
+        googleLogin,
         updateUser,
         refreshUser,
         logout,

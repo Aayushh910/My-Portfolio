@@ -44,6 +44,23 @@ const userSchema = new mongoose.Schema(
       enum: ['Administrator', 'User'],
       default: 'User',
     },
+    googleId: {
+      type: String,
+      default: null,
+    },
+    authProvider: {
+      type: String,
+      enum: ['local', 'google'],
+      default: 'local',
+    },
+    resetPasswordToken: {
+      type: String,
+      default: null,
+    },
+    resetPasswordExpires: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,
@@ -51,20 +68,17 @@ const userSchema = new mongoose.Schema(
 );
 
 // Hash password before saving
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
-  try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (err) {
-    next(err);
-  }
+userSchema.pre('save', async function () {
+  if (!this.isModified('password')) return;
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
 });
 
 // Compare password helper
 userSchema.methods.comparePassword = async function (candidatePassword) {
+  if (!this.password || !candidatePassword) return false;
   return bcrypt.compare(candidatePassword, this.password);
 };
 
 export const User = mongoose.model('User', userSchema);
+

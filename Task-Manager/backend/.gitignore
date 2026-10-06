@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Environment files with database credentials & secrets
+.env
+.env.local
+.env.*.local
+*.env
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS & Editor
+.DS_Store
+.vscode/
+.idea/
