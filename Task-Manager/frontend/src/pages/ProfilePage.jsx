@@ -17,6 +17,10 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
 import { authService } from '../services/authService';
+import {
+  PasswordStrengthIndicator,
+  checkPasswordStrength,
+} from '../components/PasswordStrengthIndicator';
 
 const PRESET_AVATARS = [
   'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
@@ -104,8 +108,9 @@ export const ProfilePage = () => {
       return;
     }
 
-    if (newPassword.length < 6) {
-      showError('New password must be at least 6 characters long.');
+    const { isStrong } = checkPasswordStrength(newPassword);
+    if (!isStrong) {
+      showError('New password must be at least 8 characters long and contain uppercase, lowercase, a number, and a special symbol.');
       return;
     }
 
@@ -430,6 +435,7 @@ export const ProfilePage = () => {
                   {showNewPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                 </button>
               </div>
+              <PasswordStrengthIndicator password={newPassword} />
             </div>
 
             {/* Confirm Password */}
