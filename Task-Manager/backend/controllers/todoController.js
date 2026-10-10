@@ -1,15 +1,43 @@
 import mongoose from 'mongoose';
 import { Todo } from '../models/Todo.js';
 import { createLog } from '../services/logService.js';
+import {
+  generateTaskCacheKey,
+  getCachedData,
+  setCachedData,
+  invalidateTaskCache,
+  getCacheStats,
+  flushAllCache,
+} from '../services/cacheService.js';
 
 export const getTodos = async (req, res) => {
+  const startTime = performance.now();
   try {
     const { q, status, sort } = req.query;
     const currentUser = req.user;
+    const userIdentifier = currentUser?.id || currentUser?.username || 'admin';
+    const cacheKey = generateTaskCacheKey(userIdentifier, req.query);
 
-    // Strict Scope: Each user (including Administrator) sees only their own personal tasks
-    const userConditions = [{ createdBy: currentUser.username }];
-    if (currentUser.id) {
+    // 1. Cache check (node-cache)
+    const cachedData = getCachedData(cacheKey);
+    if (cachedData) {
+      const responseTime = (performance.now() - startTime).toFixed(2);
+      res.setHeader('X-Cache', 'HIT');
+      res.setHeader('X-Response-Time', `${responseTime}ms`);
+
+      return res.status(200).json({
+        success: true,
+        cached: true,
+        source: 'cache',
+        responseTime: `${responseTime}ms`,
+        count: cachedData.length,
+        data: cachedData,
+      });
+    }
+
+    // 2. Cache MISS -> Query MongoDB
+    const userConditions = [{ createdBy: currentUser?.username || 'admin' }];
+    if (currentUser?.id) {
       userConditions.push({ userId: currentUser.id });
     }
     const filter = { $or: userConditions };
@@ -38,8 +66,18 @@ export const getTodos = async (req, res) => {
 
     const todos = await Todo.find(filter).sort(sortOptions).lean();
 
+    // 3. Store result in cache (60 seconds TTL)
+    setCachedData(cacheKey, todos, 60);
+
+    const responseTime = (performance.now() - startTime).toFixed(2);
+    res.setHeader('X-Cache', 'MISS');
+    res.setHeader('X-Response-Time', `${responseTime}ms`);
+
     return res.status(200).json({
       success: true,
+      cached: false,
+      source: 'mongodb',
+      responseTime: `${responseTime}ms`,
       count: todos.length,
       data: todos,
     });
@@ -124,6 +162,9 @@ export const createTodo = async (req, res) => {
 
     await todo.save();
 
+    // Invalidate cache immediately on write operation (POST)
+    invalidateTaskCache(currentUser?.id || currentUser?.username);
+
     // Log creation with user context in MongoDB
     await createLog(
       'TODO_CREATED',
@@ -207,6 +248,9 @@ export const updateTodo = async (req, res) => {
 
     await todo.save();
 
+    // Invalidate cache immediately on write operation (PUT)
+    invalidateTaskCache(currentUser?.id || currentUser?.username);
+
     // Log update in MongoDB
     await createLog(
       'TODO_UPDATED',
@@ -283,6 +327,9 @@ export const updateTodoStatus = async (req, res) => {
     todo.completedAt = targetStatus === 'completed' ? new Date() : null;
     await todo.save();
 
+    // Invalidate cache immediately on write operation (PATCH status)
+    invalidateTaskCache(currentUser?.id || currentUser?.username);
+
     // Log status change in MongoDB
     if (targetStatus === 'completed') {
       await createLog(
@@ -354,6 +401,9 @@ export const deleteTodo = async (req, res) => {
 
     await Todo.findByIdAndDelete(id);
 
+    // Invalidate cache immediately on write operation (DELETE)
+    invalidateTaskCache(currentUser?.id || currentUser?.username);
+
     // Log deletion in MongoDB
     await createLog(
       'TODO_DELETED',
@@ -419,3 +469,26 @@ export const getTodoStats = async (req, res) => {
     });
   }
 };
+
+/**
+ * Controller to inspect current cache keys and statistics
+ */
+export const getCacheStatsHandler = (req, res) => {
+  const stats = getCacheStats();
+  return res.status(200).json({
+    success: true,
+    ...stats,
+  });
+};
+
+/**
+ * Controller to manually flush cache (useful for benchmarks/testing)
+ */
+export const clearCacheHandler = (req, res) => {
+  flushAllCache();
+  return res.status(200).json({
+    success: true,
+    message: 'Cache flushed successfully.',
+  });
+};
+

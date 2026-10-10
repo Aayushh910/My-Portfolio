@@ -34,3 +34,33 @@ export const requireAuth = (req, res, next) => {
     });
   }
 };
+
+/**
+ * Optional authentication middleware for flexible API access (e.g., Postman / Thunder Client testing)
+ * If valid token is present, populates req.user.
+ * If no token is present, falls back to default admin user so GET /tasks works immediately.
+ */
+export const optionalAuth = (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.split(' ')[1];
+      if (token) {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret');
+        req.user = decoded;
+        return next();
+      }
+    }
+
+    // Default fallback user for open testing
+    req.user = { id: null, username: 'admin', role: 'Administrator' };
+    next();
+  } catch (error) {
+    // If token was provided but is invalid or expired, return 401
+    return res.status(401).json({
+      success: false,
+      message: 'Invalid or expired authentication token.',
+    });
+  }
+};
+

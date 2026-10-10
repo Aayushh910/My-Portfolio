@@ -47,6 +47,8 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/todos', todoRoutes);
+app.use('/api/tasks', todoRoutes);
+app.use('/tasks', todoRoutes);
 app.use('/api/logs', logRoutes);
 app.use('/api/export', exportRoutes);
 

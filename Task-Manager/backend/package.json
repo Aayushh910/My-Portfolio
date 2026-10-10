@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "benchmark": "node benchmark_cache.js"
   },
   "keywords": [
     "todo",
@@ -28,6 +29,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.9.5",
     "morgan": "^1.10.0",
+    "node-cache": "^5.1.2",
     "pdfkit": "^0.16.0"
   },
   "devDependencies": {
