@@ -96,6 +96,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
               type="button"
               onClick={onClose}
               className="lg:hidden p-1.5 text-muted hover:text-textMain rounded-lg hover:bg-black/5"
+              aria-label="Close navigation sidebar"
             >
               <X className="w-5 h-5" />
             </button>

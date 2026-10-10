@@ -28,6 +28,7 @@ export const TodoCard = ({
               onClick={() => onEdit(todo)}
               className="p-1.5 rounded-lg text-muted hover:text-textMain hover:bg-black/5 transition-colors"
               title="Edit Todo"
+              aria-label={`Edit todo "${todo.title}"`}
             >
               <Edit2 className="w-4 h-4" />
             </button>
@@ -36,6 +37,7 @@ export const TodoCard = ({
               onClick={() => onDelete(todo)}
               className="p-1.5 rounded-lg text-muted hover:text-rose-600 hover:bg-rose-50 transition-colors"
               title="Delete Todo"
+              aria-label={`Delete todo "${todo.title}"`}
             >
               <Trash2 className="w-4 h-4" />
             </button>
@@ -54,6 +56,7 @@ export const TodoCard = ({
                 : 'text-muted hover:text-brand-700 hover:bg-brand-50'
             }`}
             title={isCompleted ? 'Mark as Incomplete' : 'Mark as Complete'}
+            aria-label={isCompleted ? `Mark "${todo.title}" as incomplete` : `Mark "${todo.title}" as complete`}
           >
             {isCompleted ? (
               <CheckCircle2 className="w-5 h-5 fill-brand-100 text-brand-700" />

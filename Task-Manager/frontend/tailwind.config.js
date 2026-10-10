@@ -34,7 +34,7 @@ export default {
         bgMain: '#F5F7F4',
         surface: '#FFFFFF',
         textMain: '#24302A',
-        muted: '#718078',
+        muted: '#4A5850', // High contrast WCAG AAA compliant tone (7.3:1)
         borderMuted: '#DCE4DE',
       },
       fontFamily: {

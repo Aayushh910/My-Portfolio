@@ -104,23 +104,23 @@ export const PasswordStrengthIndicator = ({ password = '', compact = false }) =>
       {/* Checklist Grid */}
       <div className="grid grid-cols-2 gap-x-2 gap-y-1 pt-1 text-[11px]">
         <div className={`flex items-center gap-1.5 ${checks.length ? 'text-emerald-700' : 'text-muted'}`}>
-          {checks.length ? <Check className="w-3 h-3 text-emerald-600 flex-shrink-0" /> : <X className="w-3 h-3 text-slate-400 flex-shrink-0" />}
+          {checks.length ? <Check className="w-3 h-3 text-emerald-600 flex-shrink-0" /> : <X className="w-3 h-3 text-slate-500 flex-shrink-0" />}
           <span>8+ characters</span>
         </div>
         <div className={`flex items-center gap-1.5 ${checks.upper ? 'text-emerald-700' : 'text-muted'}`}>
-          {checks.upper ? <Check className="w-3 h-3 text-emerald-600 flex-shrink-0" /> : <X className="w-3 h-3 text-slate-400 flex-shrink-0" />}
+          {checks.upper ? <Check className="w-3 h-3 text-emerald-600 flex-shrink-0" /> : <X className="w-3 h-3 text-slate-500 flex-shrink-0" />}
           <span>Uppercase letter</span>
         </div>
         <div className={`flex items-center gap-1.5 ${checks.lower ? 'text-emerald-700' : 'text-muted'}`}>
-          {checks.lower ? <Check className="w-3 h-3 text-emerald-600 flex-shrink-0" /> : <X className="w-3 h-3 text-slate-400 flex-shrink-0" />}
+          {checks.lower ? <Check className="w-3 h-3 text-emerald-600 flex-shrink-0" /> : <X className="w-3 h-3 text-slate-500 flex-shrink-0" />}
           <span>Lowercase letter</span>
         </div>
         <div className={`flex items-center gap-1.5 ${checks.number ? 'text-emerald-700' : 'text-muted'}`}>
-          {checks.number ? <Check className="w-3 h-3 text-emerald-600 flex-shrink-0" /> : <X className="w-3 h-3 text-slate-400 flex-shrink-0" />}
+          {checks.number ? <Check className="w-3 h-3 text-emerald-600 flex-shrink-0" /> : <X className="w-3 h-3 text-slate-500 flex-shrink-0" />}
           <span>At least 1 number</span>
         </div>
         <div className={`flex items-center gap-1.5 col-span-2 ${checks.special ? 'text-emerald-700' : 'text-muted'}`}>
-          {checks.special ? <Check className="w-3 h-3 text-emerald-600 flex-shrink-0" /> : <X className="w-3 h-3 text-slate-400 flex-shrink-0" />}
+          {checks.special ? <Check className="w-3 h-3 text-emerald-600 flex-shrink-0" /> : <X className="w-3 h-3 text-slate-500 flex-shrink-0" />}
           <span>Special symbol (!@#$%^&*)</span>
         </div>
       </div>

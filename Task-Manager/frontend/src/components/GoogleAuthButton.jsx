@@ -241,6 +241,7 @@ export const GoogleAuthButton = ({
                 type="button"
                 onClick={() => setIsHelpOpen(false)}
                 className="p-1 text-muted hover:text-textMain rounded-lg hover:bg-black/5"
+                aria-label="Close Google help modal"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -320,6 +321,7 @@ export const GoogleAuthButton = ({
                 type="button"
                 onClick={() => setIsConfigModalOpen(false)}
                 className="p-1 text-muted hover:text-textMain rounded-lg hover:bg-black/5"
+                aria-label="Close configuration modal"
               >
                 <X className="w-4 h-4" />
               </button>

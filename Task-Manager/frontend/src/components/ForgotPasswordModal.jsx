@@ -156,6 +156,7 @@ export const ForgotPasswordModal = ({ isOpen, onClose, onSuccess }) => {
             onClick={onClose}
             disabled={isLoading}
             className="p-1.5 text-muted hover:text-textMain rounded-xl hover:bg-black/5 transition-colors"
+            aria-label="Close reset password dialog"
           >
             <X className="w-4 h-4" />
           </button>

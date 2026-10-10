@@ -63,6 +63,7 @@ export const TodoModal = ({
             onClick={onClose}
             disabled={isSubmitting}
             className="text-muted hover:text-textMain p-1.5 rounded-lg hover:bg-black/5 transition-colors"
+            aria-label="Close todo dialog"
           >
             <X className="w-5 h-5" />
           </button>

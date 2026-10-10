@@ -63,6 +63,7 @@ export const Navbar = ({ onOpenSidebar, onOpenAddModal }) => {
             onClick={() => navigate('/profile')}
             className="flex items-center gap-2.5 p-1 rounded-xl hover:bg-black/5 transition-colors group"
             title="View Profile Settings"
+            aria-label="View profile settings"
           >
             <div className="w-8 h-8 rounded-xl overflow-hidden bg-brand-700 text-white font-bold text-xs flex items-center justify-center border border-brand-200 shadow-xs flex-shrink-0">
               {user?.avatar ? (
@@ -87,6 +88,7 @@ export const Navbar = ({ onOpenSidebar, onOpenAddModal }) => {
             onClick={handleLogout}
             className="p-2 text-muted hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
             title="Sign out"
+            aria-label="Sign out"
           >
             <LogOut className="w-4 h-4" />
           </button>

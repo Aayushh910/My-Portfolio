@@ -166,6 +166,7 @@ export const TodosPage = () => {
             disabled={isRefreshing}
             className="p-2.5 rounded-xl border border-borderMuted bg-surface text-muted hover:text-textMain hover:bg-black/5 transition-colors shadow-subtle"
             title="Refresh list"
+            aria-label="Refresh todo list"
           >
             <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-brand-700' : ''}`} />
           </button>
@@ -214,6 +215,7 @@ export const TodosPage = () => {
                     : 'text-muted hover:text-textMain'
                 }`}
                 title="Grid View"
+                aria-label="Switch to grid view"
               >
                 <LayoutGrid className="w-4 h-4" />
               </button>
@@ -226,6 +228,7 @@ export const TodosPage = () => {
                     : 'text-muted hover:text-textMain'
                 }`}
                 title="Table View"
+                aria-label="Switch to table view"
               >
                 <List className="w-4 h-4" />
               </button>

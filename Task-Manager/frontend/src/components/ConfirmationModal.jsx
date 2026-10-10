@@ -39,6 +39,7 @@ export const ConfirmationModal = ({
             onClick={onCancel}
             disabled={isProcessing}
             className="text-muted hover:text-textMain p-1 rounded-lg hover:bg-black/5 transition-colors"
+            aria-label="Close confirmation dialog"
           >
             <X className="w-4 h-4" />
           </button>

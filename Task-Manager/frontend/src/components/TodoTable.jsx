@@ -48,6 +48,7 @@ export const TodoTable = ({
                           : 'text-muted hover:text-brand-700 hover:bg-brand-50'
                       }`}
                       title={isCompleted ? 'Mark Incomplete' : 'Mark Completed'}
+                      aria-label={isCompleted ? `Mark "${todo.title}" as incomplete` : `Mark "${todo.title}" as complete`}
                     >
                       {isToggling ? (
                         <span className="w-4 h-4 border-2 border-brand-700/40 border-t-brand-700 rounded-full animate-spin" />
@@ -100,6 +101,7 @@ export const TodoTable = ({
                         onClick={() => onEdit(todo)}
                         className="p-1.5 rounded-lg text-muted hover:text-textMain hover:bg-black/5 transition-colors"
                         title="Edit"
+                        aria-label={`Edit todo "${todo.title}"`}
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
@@ -108,6 +110,7 @@ export const TodoTable = ({
                         onClick={() => onDelete(todo)}
                         className="p-1.5 rounded-lg text-muted hover:text-rose-600 hover:bg-rose-50 transition-colors"
                         title="Delete"
+                        aria-label={`Delete todo "${todo.title}"`}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>

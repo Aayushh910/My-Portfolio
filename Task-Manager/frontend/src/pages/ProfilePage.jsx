@@ -190,6 +190,7 @@ export const ProfilePage = () => {
                   onClick={() => fileInputRef.current?.click()}
                   className="absolute -bottom-2 -right-2 p-2 bg-brand-700 hover:bg-brand-800 text-white rounded-2xl shadow-md border-2 border-surface transition-transform hover:scale-105"
                   title="Upload image"
+                  aria-label="Upload profile image"
                 >
                   <Camera className="w-4 h-4" />
                 </button>
@@ -246,6 +247,7 @@ export const ProfilePage = () => {
                             ? 'border-brand-700 ring-2 ring-brand-700/30'
                             : 'border-borderMuted hover:border-brand-300'
                         }`}
+                        aria-label={`Select avatar preset ${idx + 1}`}
                       >
                         <img
                           src={presetUrl}

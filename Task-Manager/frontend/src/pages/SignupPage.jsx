@@ -98,7 +98,7 @@ export const SignupPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-bgMain flex items-center justify-center p-3 sm:p-5 lg:p-6">
+    <main className="min-h-screen bg-bgMain flex items-center justify-center p-3 sm:p-5 lg:p-6">
       <div className="w-full max-w-4xl bg-surface rounded-2xl border border-slate-200 shadow-sm overflow-hidden grid grid-cols-1 lg:grid-cols-12">
         {/* Left Side: Brand & Feature Showcase (Desktop / Side-by-Side) */}
         <div className="hidden lg:flex lg:col-span-5 bg-gradient-to-br from-brand-900 via-brand-800 to-slate-900 text-white p-7 flex-col justify-between relative overflow-hidden">
@@ -189,7 +189,7 @@ export const SignupPage = () => {
             {/* Row 1: Username & Email side-by-side */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-semibold text-textMain mb-1">
+                <label htmlFor="signup-username" className="block text-xs font-semibold text-textMain mb-1">
                   Username <span className="text-rose-500">*</span>
                 </label>
                 <div className="relative">
@@ -197,6 +197,8 @@ export const SignupPage = () => {
                     <User className="w-3.5 h-3.5" />
                   </div>
                   <input
+                    id="signup-username"
+                    name="username"
                     type="text"
                     required
                     placeholder="e.g. johndoe"
@@ -208,7 +210,7 @@ export const SignupPage = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-textMain mb-1">
+                <label htmlFor="signup-email" className="block text-xs font-semibold text-textMain mb-1">
                   Email <span className="text-muted text-[10px] font-normal">(for recovery)</span>
                 </label>
                 <div className="relative">
@@ -216,6 +218,8 @@ export const SignupPage = () => {
                     <Mail className="w-3.5 h-3.5" />
                   </div>
                   <input
+                    id="signup-email"
+                    name="email"
                     type="email"
                     placeholder="name@example.com"
                     value={email}
@@ -229,7 +233,7 @@ export const SignupPage = () => {
             {/* Row 2: Password & Confirm Password side-by-side */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-semibold text-textMain mb-1">
+                <label htmlFor="signup-password" className="block text-xs font-semibold text-textMain mb-1">
                   Password <span className="text-rose-500">*</span>
                 </label>
                 <div className="relative">
@@ -237,6 +241,8 @@ export const SignupPage = () => {
                     <Lock className="w-3.5 h-3.5" />
                   </div>
                   <input
+                    id="signup-password"
+                    name="password"
                     type={showPassword ? 'text' : 'password'}
                     required
                     placeholder="Strong password"
@@ -256,7 +262,7 @@ export const SignupPage = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-textMain mb-1">
+                <label htmlFor="signup-confirm-password" className="block text-xs font-semibold text-textMain mb-1">
                   Confirm Password <span className="text-rose-500">*</span>
                 </label>
                 <div className="relative">
@@ -264,6 +270,8 @@ export const SignupPage = () => {
                     <Lock className="w-3.5 h-3.5" />
                   </div>
                   <input
+                    id="signup-confirm-password"
+                    name="confirmPassword"
                     type={showConfirmPassword ? 'text' : 'password'}
                     required
                     placeholder="Re-enter password"
@@ -336,6 +344,6 @@ export const SignupPage = () => {
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 };

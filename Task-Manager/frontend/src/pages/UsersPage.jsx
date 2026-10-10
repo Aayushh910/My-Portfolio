@@ -236,6 +236,7 @@ export const UsersPage = () => {
                         onClick={() => setSelectedUser(u)}
                         className="p-1.5 rounded-lg text-muted hover:text-brand-800 hover:bg-brand-50 transition-colors"
                         title="View User Details"
+                        aria-label={`View user details for ${u.username}`}
                       >
                         <Eye className="w-4 h-4" />
                       </button>
@@ -276,6 +277,7 @@ export const UsersPage = () => {
                 type="button"
                 onClick={() => setSelectedUser(null)}
                 className="p-1.5 text-muted hover:text-textMain rounded-lg hover:bg-black/5"
+                aria-label="Close user details modal"
               >
                 <X className="w-5 h-5" />
               </button>

@@ -50,7 +50,7 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-bgMain flex flex-col justify-center items-center p-4 sm:p-6 lg:p-8">
+    <main className="min-h-screen bg-bgMain flex flex-col justify-center items-center p-4 sm:p-6 lg:p-8">
       <div className="w-full max-w-md">
         {/* Brand Header */}
         <div className="text-center mb-6">
@@ -84,7 +84,7 @@ export const LoginPage = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Username or Email */}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-textMain mb-1.5">
+              <label htmlFor="login-username" className="block text-xs font-semibold uppercase tracking-wider text-textMain mb-1.5">
                 Username or Email Address
               </label>
               <div className="relative">
@@ -92,6 +92,8 @@ export const LoginPage = () => {
                   <User className="w-4 h-4" />
                 </div>
                 <input
+                  id="login-username"
+                  name="username"
                   type="text"
                   required
                   autoComplete="username"
@@ -106,7 +108,7 @@ export const LoginPage = () => {
             {/* Password */}
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-semibold uppercase tracking-wider text-textMain">
+                <label htmlFor="login-password" className="block text-xs font-semibold uppercase tracking-wider text-textMain">
                   Password
                 </label>
                 <button
@@ -122,6 +124,8 @@ export const LoginPage = () => {
                   <Lock className="w-4 h-4" />
                 </div>
                 <input
+                  id="login-password"
+                  name="password"
                   type={showPassword ? 'text' : 'password'}
                   required
                   autoComplete="current-password"
@@ -205,6 +209,6 @@ export const LoginPage = () => {
           setUsername(resetId);
         }}
       />
-    </div>
+    </main>
   );
 };
