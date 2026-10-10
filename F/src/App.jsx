@@ -1,14 +1,16 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
-import { useEffect } from 'react'
+import { useEffect, Suspense, lazy } from 'react'
 import './App.css'
 import { ThemeProvider } from './context/ThemeContext'
 import Navbar from './components/Navbar'
 import Footer from './components/footer'
-import HomePage from './pages/home'
-import AboutPage from './pages/about'
-import SkillPage from './pages/skill'
-import ProjectsPage from './pages/projects'
-import ContactPage from './pages/contact'
+
+// Lazy-loaded routes (including non-critical Projects and Contact pages)
+const HomePage = lazy(() => import('./pages/home'))
+const AboutPage = lazy(() => import('./pages/about'))
+const SkillPage = lazy(() => import('./pages/skill'))
+const ProjectsPage = lazy(() => import('./pages/projects'))
+const ContactPage = lazy(() => import('./pages/contact'))
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -16,11 +18,31 @@ function ScrollToTop() {
   return null
 }
 
+function PageFallback() {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+      <div style={{
+        width: '36px',
+        height: '36px',
+        border: '3px solid rgba(110, 143, 123, 0.2)',
+        borderTopColor: '#285943',
+        borderRadius: '50%',
+        animation: 'spin 0.8s linear infinite'
+      }} />
+      <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+    </div>
+  )
+}
+
 function Layout({ children }) {
   return (
     <div className="app-shell">
       <Navbar />
-      <main>{children}</main>
+      <main>
+        <Suspense fallback={<PageFallback />}>
+          {children}
+        </Suspense>
+      </main>
       <Footer />
     </div>
   )
