@@ -1,0 +1,89 @@
+name: taskflow-app
+
+services:
+  # ==========================================
+  # 1. Database: MongoDB 7.0 Persistence
+  # ==========================================
+  mongodb:
+    container_name: taskflow-mongodb
+    image: mongo:7.0-jammy
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: tododb
+    volumes:
+      - mongodb_data:/data/db
+    ports:
+      - "27017:27017"
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --eval 'db.adminCommand(\"ping\")' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - taskflow-net
+
+  # ==========================================
+  # 2. Backend: Node.js / Express REST & EDA API
+  # ==========================================
+  backend:
+    container_name: taskflow-backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    environment:
+      PORT: 5000
+      MONGODB_URI: mongodb://mongodb:27017/tododb
+      JWT_SECRET: ${JWT_SECRET:-super_secret_jwt_key_todo_app_2026_teal_sage}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
+      CLIENT_URL: ${CLIENT_URL:-http://localhost,http://localhost:80,http://localhost:5173}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+    ports:
+      - "5000:5000"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5000/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    networks:
+      - taskflow-net
+
+  # ==========================================
+  # 3. Frontend: React 18 / Vite / Nginx Reverse Proxy
+  # ==========================================
+  frontend:
+    container_name: taskflow-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "80:80"
+      - "5173:80"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    networks:
+      - taskflow-net
+
+# Persistent Named Volumes
+volumes:
+  mongodb_data:
+    driver: local
+
+# Internal Bridge Network
+networks:
+  taskflow-net:
+    driver: bridge
