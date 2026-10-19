@@ -5,6 +5,13 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Build arguments for Vite compilation
+ARG VITE_API_URL=/api
+ARG VITE_GOOGLE_CLIENT_ID=695691958440-ts77okluhg4vu6oinf7pj9d6db404qqm.apps.googleusercontent.com
+
+ENV VITE_API_URL=$VITE_API_URL \
+    VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID
+
 # Cache package manifests
 COPY package*.json ./
 

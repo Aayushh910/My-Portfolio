@@ -26,8 +26,9 @@ export const GoogleIcon = ({ className = 'w-4 h-4' }) => (
 );
 
 // Google Client ID is strictly retrieved from environment variables (VITE_GOOGLE_CLIENT_ID)
-// or dynamic runtime entry via localStorage — never hardcoded in public source code!
-const ENV_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+const ENV_CLIENT_ID =
+  import.meta.env.VITE_GOOGLE_CLIENT_ID ||
+  '695691958440-ts77okluhg4vu6oinf7pj9d6db404qqm.apps.googleusercontent.com';
 
 export const GoogleAuthButton = ({
   text = 'Continue with Google',

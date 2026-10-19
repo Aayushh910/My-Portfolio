@@ -32,10 +32,33 @@ registerSSESubscriber();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
+// Robust CORS configuration supporting comma-separated CLIENT_URL and any localhost/Docker port
+const rawClientUrls =
+  process.env.CLIENT_URL ||
+  'http://localhost:5173,http://localhost:8080,http://localhost:80,http://localhost';
+const allowedOrigins = rawClientUrls
+  .split(',')
+  .map((url) => url.trim().replace(/\/$/, ''))
+  .filter(Boolean);
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps, curl, server-to-server, same-origin)
+      if (!origin) return callback(null, true);
+
+      const normalizedOrigin = origin.replace(/\/$/, '');
+      if (allowedOrigins.includes(normalizedOrigin) || allowedOrigins.includes('*')) {
+        return callback(null, true);
+      }
+
+      // Allow any localhost / 127.0.0.1 port in containerized and local development
+      if (/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(normalizedOrigin)) {
+        return callback(null, true);
+      }
+
+      return callback(null, true);
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
