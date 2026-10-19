@@ -55,6 +55,10 @@ export const LogsPage = () => {
 
   useEffect(() => {
     fetchLogs();
+
+    const handleMutation = () => fetchLogs(true);
+    window.addEventListener('todo_mutated', handleMutation);
+    return () => window.removeEventListener('todo_mutated', handleMutation);
   }, [fetchLogs]);
 
   // Client-side search in descriptions & todo titles
