@@ -6,7 +6,7 @@ const runTests = async () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         username: 'sarah_smith',
-        password: 'secure_password_123',
+        password: 'Secure_password_123!',
         email: 'sarah@example.com',
       }),
     });
@@ -21,7 +21,7 @@ const runTests = async () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         username: 'sarah_smith',
-        password: 'secure_password_123',
+        password: 'Secure_password_123!',
       }),
     });
     const loginData = await loginRes.json();

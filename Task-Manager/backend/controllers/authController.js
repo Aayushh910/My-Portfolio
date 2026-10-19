@@ -1,6 +1,8 @@
 import jwt from 'jsonwebtoken';
 import { User } from '../models/User.js';
 import { createLog } from '../services/logService.js';
+import { eventBus } from '../events/eventBus.js';
+import { EVENT_TYPES } from '../events/eventTypes.js';
 
 // Password strength validator: >=8 chars, uppercase, lowercase, number, special char
 export const isStrongPassword = (pass) => {
@@ -81,13 +83,11 @@ export const register = async (req, res) => {
 
     await newUser.save();
 
-    // Log registration in MongoDB
-    await createLog(
-      'USER_REGISTERED',
-      `New user registered: '${trimmedUser}'`,
-      null,
-      newUser._id,
-      newUser.username
+    // Asynchronously dispatch domain event for registration
+    eventBus.publish(
+      EVENT_TYPES.USER_REGISTERED,
+      { user: newUser },
+      { userId: newUser._id, username: newUser.username }
     );
 
     const token = jwt.sign(
@@ -193,8 +193,12 @@ export const login = async (req, res) => {
       { expiresIn: '7d' }
     );
 
-    // Record activity log in MongoDB
-    await createLog('LOGIN', `User '${user.username}' logged in.`, null, user._id, user.username);
+    // Asynchronously dispatch domain event for login
+    eventBus.publish(
+      EVENT_TYPES.USER_LOGGED_IN,
+      { user, authMethod: 'password' },
+      { userId: user._id, username: user.username }
+    );
 
     return res.status(200).json({
       success: true,

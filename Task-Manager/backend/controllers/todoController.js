@@ -9,6 +9,8 @@ import {
   getCacheStats,
   flushAllCache,
 } from '../services/cacheService.js';
+import { eventBus } from '../events/eventBus.js';
+import { EVENT_TYPES } from '../events/eventTypes.js';
 
 export const getTodos = async (req, res) => {
   const startTime = performance.now();
@@ -162,16 +164,14 @@ export const createTodo = async (req, res) => {
 
     await todo.save();
 
-    // Invalidate cache immediately on write operation (POST)
-    invalidateTaskCache(currentUser?.id || currentUser?.username);
-
-    // Log creation with user context in MongoDB
-    await createLog(
-      'TODO_CREATED',
-      `Created todo: "${todo.title}"`,
-      todo._id,
-      currentUser?.id || null,
-      currentUser?.username || 'admin'
+    // Asynchronously dispatch domain event; subscribers handle audit logging & cache invalidation
+    eventBus.publish(
+      EVENT_TYPES.TODO_CREATED,
+      { todo, user: currentUser },
+      {
+        userId: currentUser?.id || null,
+        username: currentUser?.username || 'admin',
+      }
     );
 
     return res.status(201).json({
@@ -248,16 +248,18 @@ export const updateTodo = async (req, res) => {
 
     await todo.save();
 
-    // Invalidate cache immediately on write operation (PUT)
-    invalidateTaskCache(currentUser?.id || currentUser?.username);
-
-    // Log update in MongoDB
-    await createLog(
-      'TODO_UPDATED',
-      `Updated todo: "${todo.title}"`,
-      todo._id,
-      currentUser?.id || null,
-      currentUser?.username || 'admin'
+    // Asynchronously dispatch domain event
+    eventBus.publish(
+      EVENT_TYPES.TODO_UPDATED,
+      {
+        todo,
+        changes: { title, description, status },
+        user: currentUser,
+      },
+      {
+        userId: currentUser?.id || null,
+        username: currentUser?.username || 'admin',
+      }
     );
 
     return res.status(200).json({
@@ -327,27 +329,22 @@ export const updateTodoStatus = async (req, res) => {
     todo.completedAt = targetStatus === 'completed' ? new Date() : null;
     await todo.save();
 
-    // Invalidate cache immediately on write operation (PATCH status)
-    invalidateTaskCache(currentUser?.id || currentUser?.username);
+    await todo.save();
 
-    // Log status change in MongoDB
-    if (targetStatus === 'completed') {
-      await createLog(
-        'TODO_COMPLETED',
-        `Marked todo as completed: "${todo.title}"`,
-        todo._id,
-        currentUser?.id || null,
-        currentUser?.username || 'admin'
-      );
-    } else {
-      await createLog(
-        'TODO_MARKED_INCOMPLETE',
-        `Marked todo as incomplete: "${todo.title}"`,
-        todo._id,
-        currentUser?.id || null,
-        currentUser?.username || 'admin'
-      );
-    }
+    // Asynchronously dispatch domain event
+    eventBus.publish(
+      EVENT_TYPES.TODO_STATUS_CHANGED,
+      {
+        todo,
+        previousStatus: todo.status === 'completed' ? 'incomplete' : 'completed',
+        newStatus: targetStatus,
+        user: currentUser,
+      },
+      {
+        userId: currentUser?.id || null,
+        username: currentUser?.username || 'admin',
+      }
+    );
 
     return res.status(200).json({
       success: true,
@@ -401,16 +398,18 @@ export const deleteTodo = async (req, res) => {
 
     await Todo.findByIdAndDelete(id);
 
-    // Invalidate cache immediately on write operation (DELETE)
-    invalidateTaskCache(currentUser?.id || currentUser?.username);
-
-    // Log deletion in MongoDB
-    await createLog(
-      'TODO_DELETED',
-      `Deleted todo: "${todoTitle}"`,
-      todoId,
-      currentUser?.id || null,
-      currentUser?.username || 'admin'
+    // Asynchronously dispatch domain event
+    eventBus.publish(
+      EVENT_TYPES.TODO_DELETED,
+      {
+        todoId: id,
+        title: todoTitle,
+        user: currentUser,
+      },
+      {
+        userId: currentUser?.id || null,
+        username: currentUser?.username || 'admin',
+      }
     );
 
     return res.status(200).json({

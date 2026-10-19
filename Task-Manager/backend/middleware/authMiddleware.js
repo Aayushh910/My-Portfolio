@@ -64,3 +64,16 @@ export const optionalAuth = (req, res, next) => {
   }
 };
 
+/**
+ * Middleware to restrict endpoints exclusively to Administrators
+ */
+export const requireAdmin = (req, res, next) => {
+  if (req.user?.role !== 'Administrator') {
+    return res.status(403).json({
+      success: false,
+      message: 'Access denied. Administrator privileges required.',
+    });
+  }
+  next();
+};
+

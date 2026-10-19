@@ -10,12 +10,24 @@ import todoRoutes from './routes/todoRoutes.js';
 import logRoutes from './routes/logRoutes.js';
 import exportRoutes from './routes/exportRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import eventRoutes from './routes/eventRoutes.js';
+import jobRoutes from './routes/jobRoutes.js';
+
+// Event-Driven Architecture Subscribers
+import { registerAuditLogSubscriber } from './events/subscribers/auditLogSubscriber.js';
+import { registerCacheSubscriber } from './events/subscribers/cacheSubscriber.js';
+import { registerSSESubscriber } from './events/subscribers/sseSubscriber.js';
 
 // Load environment variables
 dotenv.config();
 
 // Connect to MongoDB
 connectDB();
+
+// Initialize Event-Driven Architecture Subscribers
+registerAuditLogSubscriber();
+registerCacheSubscriber();
+registerSSESubscriber();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -51,6 +63,8 @@ app.use('/api/tasks', todoRoutes);
 app.use('/tasks', todoRoutes);
 app.use('/api/logs', logRoutes);
 app.use('/api/export', exportRoutes);
+app.use('/api/events', eventRoutes);
+app.use('/api/jobs', jobRoutes);
 
 // 404 handler for undefined routes
 app.use((req, res) => {
