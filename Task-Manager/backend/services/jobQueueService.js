@@ -13,7 +13,10 @@ class JobQueueService {
     this.queue = []; // Array of jobIds
 
     // Periodic cleanup of expired artifacts (TTL: 15 minutes)
-    setInterval(() => this.cleanupExpiredArtifacts(), 60000);
+    const cleanupInterval = setInterval(() => this.cleanupExpiredArtifacts(), 60000);
+    if (cleanupInterval.unref) {
+      cleanupInterval.unref();
+    }
   }
 
   /**

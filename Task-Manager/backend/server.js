@@ -21,13 +21,16 @@ import { registerSSESubscriber } from './events/subscribers/sseSubscriber.js';
 // Load environment variables
 dotenv.config();
 
-// Connect to MongoDB
-connectDB();
+// Only initialize DB and event subscribers when not running automated tests
+if (process.env.NODE_ENV !== 'test') {
+  // Connect to MongoDB
+  connectDB();
 
-// Initialize Event-Driven Architecture Subscribers
-registerAuditLogSubscriber();
-registerCacheSubscriber();
-registerSSESubscriber();
+  // Initialize Event-Driven Architecture Subscribers
+  registerAuditLogSubscriber();
+  registerCacheSubscriber();
+  registerSSESubscriber();
+}
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -107,11 +110,14 @@ app.use((err, req, res, next) => {
   });
 });
 
-const server = app.listen(PORT, () => {
-  console.log(`=========================================`);
-  console.log(`🚀 Todo Backend Server running on port ${PORT}`);
-  console.log(`👉 API Base: http://localhost:${PORT}/api`);
-  console.log(`=========================================`);
-});
+let server;
+if (process.env.NODE_ENV !== 'test') {
+  server = app.listen(PORT, () => {
+    console.log(`=========================================`);
+    console.log(`🚀 Todo Backend Server running on port ${PORT}`);
+    console.log(`👉 API Base: http://localhost:${PORT}/api`);
+    console.log(`=========================================`);
+  });
+}
 
 export default app;

@@ -7,7 +7,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "benchmark": "node benchmark_cache.js"
+    "benchmark": "node benchmark_cache.js",
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --runInBand --forceExit"
   },
   "keywords": [
     "todo",
@@ -33,6 +34,9 @@
     "pdfkit": "^0.16.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.9"
+    "cross-env": "^10.1.0",
+    "jest": "^30.5.2",
+    "nodemon": "^3.1.9",
+    "supertest": "^7.3.1"
   }
 }

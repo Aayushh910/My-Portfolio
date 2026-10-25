@@ -19,6 +19,9 @@ class SSEManager {
         }
       }
     }, 25000);
+    if (this.pingInterval.unref) {
+      this.pingInterval.unref();
+    }
   }
 
   addClient(id, res, user) {
