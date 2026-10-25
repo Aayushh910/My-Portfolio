@@ -45,7 +45,7 @@ describe('Task Management CI/CD API Test Suite', () => {
   test('GET /api/health should return HTTP status 200 and system operational status', async () => {
     const response = await request(app).get('/api/health');
 
-    expect(response.status).toBe(201);
+    expect(response.status).toBe(200);
     expect(response.body).toHaveProperty('status', 'ok');
     expect(response.body).toHaveProperty('service', 'Todo Management API');
     expect(response.body).toHaveProperty('timestamp');
