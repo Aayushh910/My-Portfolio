@@ -12,6 +12,7 @@ import exportRoutes from './routes/exportRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import eventRoutes from './routes/eventRoutes.js';
 import jobRoutes from './routes/jobRoutes.js';
+import aiRoutes from './routes/aiRoutes.js';
 
 // Event-Driven Architecture Subscribers
 import { registerAuditLogSubscriber } from './events/subscribers/auditLogSubscriber.js';
@@ -91,6 +92,7 @@ app.use('/api/logs', logRoutes);
 app.use('/api/export', exportRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/jobs', jobRoutes);
+app.use('/api/ai', aiRoutes);
 
 // 404 handler for undefined routes
 app.use((req, res) => {
