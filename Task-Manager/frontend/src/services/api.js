@@ -1,9 +1,28 @@
 import axios from 'axios';
 
+// Normalize API Base URL:
+// - Uses import.meta.env.VITE_API_URL if provided
+// - Falls back to production backend (https://my-portfolio-4seo.vercel.app/api) when built for production
+// - Falls back to '/api' for local development (proxied by Vite)
+const getBaseUrl = () => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (envUrl) {
+    const trimmed = envUrl.trim().replace(/\/+$/, '');
+    if (trimmed.startsWith('http') && !trimmed.endsWith('/api')) {
+      return `${trimmed}/api`;
+    }
+    return trimmed;
+  }
+
+  if (import.meta.env.PROD) {
+    return 'https://my-portfolio-4seo.vercel.app/api';
+  }
+
+  return '/api';
+};
+
 const api = axios.create({
-  // Use relative '/api' by default so Nginx reverse proxy forwards requests seamlessly
-  // without CORS issues on any host or port.
-  baseURL: import.meta.env.VITE_API_URL || '/api',
+  baseURL: getBaseUrl(),
   headers: {
     'Content-Type': 'application/json',
   },

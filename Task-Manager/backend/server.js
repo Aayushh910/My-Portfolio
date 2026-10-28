@@ -38,38 +38,49 @@ if (process.env.NODE_ENV !== 'test') {
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Robust CORS configuration supporting comma-separated CLIENT_URL and any localhost/Docker port
+// Robust CORS configuration supporting comma-separated CLIENT_URL and any localhost/Docker/Vercel origins
 const rawClientUrls =
   process.env.CLIENT_URL ||
-  'http://localhost:5173,http://localhost:8080,http://localhost:80,http://localhost';
+  'https://taskflow-todo-09.vercel.app,http://localhost:5173,http://localhost:8080,http://localhost:80,http://localhost';
 const allowedOrigins = rawClientUrls
   .split(',')
   .map((url) => url.trim().replace(/\/$/, ''))
   .filter(Boolean);
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps, curl, server-to-server, same-origin)
-      if (!origin) return callback(null, true);
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, curl, server-to-server, same-origin)
+    if (!origin) return callback(null, true);
 
-      const normalizedOrigin = origin.replace(/\/$/, '');
-      if (allowedOrigins.includes(normalizedOrigin) || allowedOrigins.includes('*')) {
-        return callback(null, true);
-      }
-
-      // Allow any localhost / 127.0.0.1 port in containerized and local development
-      if (/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(normalizedOrigin)) {
-        return callback(null, true);
-      }
-
+    const normalizedOrigin = origin.replace(/\/$/, '');
+    if (allowedOrigins.includes(normalizedOrigin) || allowedOrigins.includes('*')) {
       return callback(null, true);
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  })
-);
+    }
+
+    // Allow any localhost / 127.0.0.1 port in containerized and local development
+    if (/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(normalizedOrigin)) {
+      return callback(null, true);
+    }
+
+    // Allow any vercel.app preview or production deployment automatically
+    try {
+      const hostname = new URL(origin).hostname;
+      if (hostname.endsWith('.vercel.app')) {
+        return callback(null, true);
+      }
+    } catch {
+      // Ignore URL parsing errors and allow fallback
+    }
+
+    return callback(null, true);
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
@@ -87,26 +98,41 @@ app.use(async (req, res, next) => {
   next();
 });
 
-// Health check endpoint
-app.get('/api/health', (req, res) => {
+// Root & Health check endpoints
+const handleHealth = (req, res) => {
   res.status(200).json({
     status: 'ok',
     timestamp: new Date().toISOString(),
     service: 'Todo Management API',
   });
-});
+};
 
-// API Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/todos', todoRoutes);
-app.use('/api/tasks', todoRoutes);
-app.use('/tasks', todoRoutes);
-app.use('/api/logs', logRoutes);
-app.use('/api/export', exportRoutes);
-app.use('/api/events', eventRoutes);
-app.use('/api/jobs', jobRoutes);
-app.use('/api/ai', aiRoutes);
+app.get('/', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    message: 'TaskFlow Todo API Backend is operational',
+    version: '1.0.0',
+    healthCheck: '/api/health',
+  });
+});
+app.get('/health', handleHealth);
+app.get('/api/health', handleHealth);
+
+// API Routes mounted on both /api/* and /* for maximum deployment compatibility
+const mountRoutes = (prefix = '') => {
+  app.use(`${prefix}/auth`, authRoutes);
+  app.use(`${prefix}/users`, userRoutes);
+  app.use(`${prefix}/todos`, todoRoutes);
+  app.use(`${prefix}/tasks`, todoRoutes);
+  app.use(`${prefix}/logs`, logRoutes);
+  app.use(`${prefix}/export`, exportRoutes);
+  app.use(`${prefix}/events`, eventRoutes);
+  app.use(`${prefix}/jobs`, jobRoutes);
+  app.use(`${prefix}/ai`, aiRoutes);
+};
+
+mountRoutes('/api');
+mountRoutes('');
 
 // 404 handler for undefined routes
 app.use((req, res) => {

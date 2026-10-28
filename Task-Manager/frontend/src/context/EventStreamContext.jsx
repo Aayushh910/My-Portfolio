@@ -37,10 +37,13 @@ export const EventStreamProvider = ({ children }) => {
       eventSourceRef.current.close();
     }
 
-    const apiUrl = import.meta.env.VITE_API_URL || '/api';
+    const rawApi =
+      import.meta.env.VITE_API_URL ||
+      (import.meta.env.PROD ? 'https://my-portfolio-4seo.vercel.app/api' : '/api');
+    const apiUrl = rawApi.trim().replace(/\/+$/, '');
     const eventSourceUrl = apiUrl.endsWith('/api')
       ? `${apiUrl}/events/stream`
-      : `${apiUrl.replace(/\/$/, '')}/api/events/stream`;
+      : `${apiUrl}/api/events/stream`;
     const es = new EventSource(eventSourceUrl);
     eventSourceRef.current = es;
 
