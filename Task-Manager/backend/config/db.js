@@ -13,7 +13,14 @@ export const connectDB = async () => {
     return cachedPromise;
   }
 
-  const mongoUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/tododb';
+  let mongoUri =
+    process.env.MONGODB_URI ||
+    'mongodb+srv://taskflow_admin:aayush9106@transitops.fef2geb.mongodb.net/tododb?retryWrites=true&w=majority';
+
+  // Normalize URI to ensure a database name is specified
+  if (mongoUri.endsWith('.mongodb.net/') || mongoUri.endsWith('.mongodb.net')) {
+    mongoUri = mongoUri.replace(/\/?$/, '/tododb?retryWrites=true&w=majority');
+  }
 
   cachedPromise = mongoose
     .connect(mongoUri, {
