@@ -2,7 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import morgan from 'morgan';
-import { connectDB } from './config/db.js';
+import mongoose from 'mongoose';
+import { connectDB, getLastDbError } from './config/db.js';
 
 // Route imports
 import authRoutes from './routes/authRoutes.js';
@@ -93,6 +94,16 @@ app.use(async (req, res, next) => {
       await connectDB();
     } catch (err) {
       console.error('[DB Middleware Error]', err.message);
+      // For health and root checks, pass through so users can inspect database status
+      if (req.path === '/' || req.path.includes('/health')) {
+        return next();
+      }
+      return res.status(503).json({
+        success: false,
+        message:
+          'Database connection failed. Please ensure MongoDB Atlas Network Access has 0.0.0.0/0 whitelisted and MONGODB_URI is set in Vercel.',
+        error: err.message,
+      });
     }
   }
   next();
@@ -100,8 +111,20 @@ app.use(async (req, res, next) => {
 
 // Root & Health check endpoints
 const handleHealth = (req, res) => {
-  res.status(200).json({
-    status: 'ok',
+  const dbState = mongoose.connection.readyState;
+  const stateMap = {
+    0: 'disconnected',
+    1: 'connected',
+    2: 'connecting',
+    3: 'disconnecting',
+  };
+  const isConnected = dbState === 1;
+
+  res.status(isConnected ? 200 : 503).json({
+    status: isConnected ? 'ok' : 'database_unavailable',
+    database: stateMap[dbState] || 'unknown',
+    databaseHost: mongoose.connection.host || null,
+    databaseError: getLastDbError(),
     timestamp: new Date().toISOString(),
     service: 'Todo Management API',
   });

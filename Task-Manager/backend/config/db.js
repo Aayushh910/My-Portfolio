@@ -1,10 +1,14 @@
 import mongoose from 'mongoose';
 
 let cachedPromise = null;
+let lastDbError = null;
+
+export const getLastDbError = () => lastDbError;
 
 export const connectDB = async () => {
   // If connection is already open, reuse it immediately
   if (mongoose.connection.readyState >= 1) {
+    lastDbError = null;
     return mongoose.connection;
   }
 
@@ -27,11 +31,13 @@ export const connectDB = async () => {
       serverSelectionTimeoutMS: 5000,
     })
     .then((conn) => {
+      lastDbError = null;
       console.log(`[Database] MongoDB Connected: ${conn.connection.host}/${conn.connection.name}`);
       return conn;
     })
     .catch((error) => {
       cachedPromise = null;
+      lastDbError = error.message;
       console.error(`[Database] MongoDB Connection Error: ${error.message}`);
       if (!process.env.VERCEL) {
         // Retry only in persistent server environments
