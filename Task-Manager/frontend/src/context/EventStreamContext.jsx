@@ -37,7 +37,10 @@ export const EventStreamProvider = ({ children }) => {
       eventSourceRef.current.close();
     }
 
-    const eventSourceUrl = '/api/events/stream';
+    const apiUrl = import.meta.env.VITE_API_URL || '/api';
+    const eventSourceUrl = apiUrl.endsWith('/api')
+      ? `${apiUrl}/events/stream`
+      : `${apiUrl.replace(/\/$/, '')}/api/events/stream`;
     const es = new EventSource(eventSourceUrl);
     eventSourceRef.current = es;
 

@@ -25,7 +25,9 @@ dotenv.config();
 // Only initialize DB and event subscribers when not running automated tests
 if (process.env.NODE_ENV !== 'test') {
   // Connect to MongoDB
-  connectDB();
+  connectDB().catch((err) => {
+    console.error('[Database] Initial connect failed:', err.message);
+  });
 
   // Initialize Event-Driven Architecture Subscribers
   registerAuditLogSubscriber();
@@ -73,6 +75,18 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(morgan('dev'));
 
+// Ensure database is connected before handling requests (crucial for serverless cold-starts)
+app.use(async (req, res, next) => {
+  if (process.env.NODE_ENV !== 'test') {
+    try {
+      await connectDB();
+    } catch (err) {
+      console.error('[DB Middleware Error]', err.message);
+    }
+  }
+  next();
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.status(200).json({
@@ -113,7 +127,7 @@ app.use((err, req, res, next) => {
 });
 
 let server;
-if (process.env.NODE_ENV !== 'test') {
+if (process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
   server = app.listen(PORT, () => {
     console.log(`=========================================`);
     console.log(`🚀 Todo Backend Server running on port ${PORT}`);
